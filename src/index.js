@@ -38,18 +38,11 @@ export function h() {
     index++;
   }
   var children = [];
-  function isValidChild(child) {
-    return child != null && true !== child && false !== child;
-  }
-  function addChild(child) {
-    if (Array.isArray(child)) {
-      children.push(child.filter(isValidChild));
-    } else if (isValidChild(child)) {
+  for (; index < arguments.length; index++) {
+    var child = arguments[index];
+    if (child !== undefined) {
       children.push(child);
     }
-  }
-  for (; index < arguments.length; index++) {
-    addChild(arguments[index]);
   }
   vnode.push(children);
 

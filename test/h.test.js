@@ -32,16 +32,18 @@ test("vnode with props", () => {
   expect(h("div", props, "baz")).toEqual(["div", props, ["baz"]]);
 });
 
-test("skip null and Boolean children", () => {
-  const expected = ["div", []];
+test("pass through null and Boolean children", () => {
+  expect(h("div", true)).toEqual(["div", [true]]);
+  expect(h("div", false)).toEqual(["div", [false]]);
+  expect(h("div", null)).toEqual(["div", [null]]);
+});
 
-  expect(h("div", true)).toEqual(expected);
-  expect(h("div", false)).toEqual(expected);
-  expect(h("div", null)).toEqual(expected);
+test("skip undefined children", () => {
+  expect(h("div", undefined)).toEqual(["div", []]);
 });
 
 test("components", () => {
-  const Component = (props, children) => h("div", props, children);
+  const Component = h.bind(null, "div");
 
   expect(h(Component, { id: "foo" }, "bar")).toEqual([
     "div",
