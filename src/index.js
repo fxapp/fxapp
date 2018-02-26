@@ -44,7 +44,9 @@ export function h() {
       children.push(child);
     }
   }
-  vnode.push(children);
+  if (children.length) {
+    vnode.push(children);
+  }
 
   return vnode;
 }

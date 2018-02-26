@@ -1,6 +1,6 @@
 import { h } from "../src";
 
-test("empty vnode", () => expect(h("div")).toEqual(["div", []]));
+test("empty vnode", () => expect(h("div")).toEqual(["div"]));
 
 test("vnode with a single child", () => {
   expect(h("div", "foo")).toEqual(["div", ["foo"]]);
@@ -32,17 +32,26 @@ test("vnode with props", () => {
   expect(h("div", props, "baz")).toEqual(["div", props, ["baz"]]);
 });
 
-test("pass through null and Boolean children", () => {
+test("pass through Boolean children", () => {
   expect(h("div", true)).toEqual(["div", [true]]);
   expect(h("div", false)).toEqual(["div", [false]]);
+});
+
+test("pass through null children", () => {
   expect(h("div", null)).toEqual(["div", [null]]);
 });
 
 test("skip undefined children", () => {
-  expect(h("div", undefined)).toEqual(["div", []]);
+  expect(h("div", undefined)).toEqual(["div"]);
 });
 
-test("components", () => {
+test("component with no props", () => {
+  const Component = ({ name = "world" }, children) => h("div", "Hello " + name);
+
+  expect(h(Component)).toEqual(["div", ["Hello world"]]);
+});
+
+test("components with props", () => {
   const Component = h.bind(null, "div");
 
   expect(h(Component, { id: "foo" }, "bar")).toEqual([
@@ -54,12 +63,6 @@ test("components", () => {
   expect(h(Component, { id: "foo" }, h(Component, { id: "bar" }))).toEqual([
     "div",
     { id: "foo" },
-    [["div", { id: "bar" }, []]]
+    [["div", { id: "bar" }]]
   ]);
-});
-
-test("component with no props", () => {
-  const Component = ({ name = "world" }, children) => h("div", "Hello " + name);
-
-  expect(h(Component)).toEqual(["div", ["Hello world"]]);
 });
