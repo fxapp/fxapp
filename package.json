@@ -1,0 +1,30 @@
+{
+  "name": "fxapp",
+  "description": "Build JavaScript apps using effects as data",
+  "version": "0.0.1",
+  "module": "src/index.js",
+  "license": "MIT",
+  "repository": "fxapp/fxapp",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "author": "Wolfgang Wedemeyer",
+  "keywords": [
+    "effects",
+    "data",
+    "vdom"
+  ],
+  "scripts": {
+    "test": "jest --coverage --no-cache",
+    "format": "prettier --write {src,test}/**/*.js"
+  },
+  "babel": {
+    "presets": "env"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1",
+    "jest": "^22.0.4",
+    "prettier": "^1.9.2"
+  }
+}
