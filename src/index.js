@@ -55,34 +55,63 @@ export function fxapp(props) {
   var globalState = assign(props.state);
   var wiredActions = assign(props.actions);
 
-  function wireStateToActions(path, state, actions) {
+  function getState(namespace, path) {
+    var path = path || "";
+    var splitPath = path.split(".").filter(function(part) {
+      return part;
+    });
+    var fullPath =
+      path.startsWith(".") && splitPath.length
+        ? splitPath
+        : namespace.concat(splitPath);
+    return get(fullPath, globalState);
+  }
+
+  function mergeState(namespace, value) {
+    var updatedSlice = assign(get(namespace, globalState), value);
+    globalState = set(namespace, updatedSlice, globalState);
+    return updatedSlice;
+  }
+
+  function wireFx(namespace, state, actions) {
+    var defaultFx = {
+      get: getState.bind(null, namespace),
+      merge: function(partialState) {
+        return ["merge", partialState];
+      }
+    };
+    var fxRunners = {
+      merge: function(namespace, props) {
+        return mergeState(namespace, props);
+      }
+    };
     for (var key in actions) {
       typeof actions[key] === "function"
         ? (function(key, action) {
             actions[key] = function(data) {
-              var actionResult = action(get(path, globalState), data);
-              if (
-                actionResult &&
-                actionResult !== (state = get(path, globalState))
-              ) {
-                globalState = set(
-                  path,
-                  assign(state, actionResult),
-                  globalState
-                );
+              var actionFx = assign(defaultFx, {
+                data: data
+              });
+              var actionResult = action(actionFx);
+              if (Array.isArray(actionResult)) {
+                var fxType = actionResult[0];
+                var fxProps = actionResult[1];
+                var fxRunner = fxRunners[fxType];
+                if (typeof fxRunner === "function") {
+                  return fxRunner(namespace, fxProps);
+                }
               }
-
               return actionResult;
             };
           })(key, actions[key])
-        : wireStateToActions(
-            path.concat(key),
+        : wireFx(
+            namespace.concat(key),
             (state[key] = assign(state[key])),
             (actions[key] = assign(actions[key]))
           );
     }
   }
-  wireStateToActions([], globalState, wiredActions);
+  wireFx([], globalState, wiredActions);
 
   return wiredActions;
 }

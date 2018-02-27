@@ -6,19 +6,21 @@ test("actions that can update state", done => {
       value: 0
     },
     actions: {
-      get: state => state,
-      up: (state, by) => {
-        expect(state).toEqual({ value: 0 });
-        return {
-          value: state.value + by
-        };
+      get: fx => fx.get(),
+      up: fx => {
+        expect(fx.get()).toEqual({ value: 0 });
+        expect(fx.data).toBe(2);
+        return fx.merge({
+          value: fx.get("value") + fx.data
+        });
       },
-      set: (state, newState) => {
-        expect(state).toEqual({ value: 2 });
-        return newState;
+      set: fx => {
+        expect(fx.get()).toEqual({ value: 2 });
+        expect(fx.data).toEqual({ merge: "properties" });
+        return fx.merge(fx.data);
       },
-      end: state => {
-        expect(state).toEqual({
+      end: fx => {
+        expect(fx.get()).toEqual({
           value: 2,
           merge: "properties"
         });
@@ -40,6 +42,7 @@ test("actions that can update state", done => {
   });
 
   expect(actions.set({ merge: "properties" })).toEqual({
+    value: 2,
     merge: "properties"
   });
 
