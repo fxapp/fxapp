@@ -51,15 +51,17 @@ test("component with no props", () => {
   expect(h(Component)).toEqual(["div", ["Hello world"]]);
 });
 
-test("components with props", () => {
-  const Component = h.bind(null, "div");
+const Component = h.bind(null, "div");
 
+test("component with props", () => {
   expect(h(Component, { id: "foo" }, "bar")).toEqual([
     "div",
     { id: "foo" },
     ["bar"]
   ]);
+});
 
+test("nested components with props", () => {
   expect(h(Component, { id: "foo" }, h(Component, { id: "bar" }))).toEqual([
     "div",
     { id: "foo" },

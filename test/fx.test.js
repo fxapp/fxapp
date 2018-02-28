@@ -1,12 +1,12 @@
 import { fxapp } from "../src";
 
-test("ignore invalid fx", done => {
+const invalidFx = ["invalid", { ignore: "me" }];
+
+test("ignore invalid fx", () => {
   const actions = fxapp({
     actions: {
-      start: () => ["invalid", { ignore: "me" }],
-      stop: () => done()
+      invalid: () => invalidFx
     }
   });
-  actions.start();
-  actions.stop();
+  expect(actions.invalid()).toEqual(invalidFx);
 });
