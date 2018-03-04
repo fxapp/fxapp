@@ -33,6 +33,9 @@ const makeApp = () =>
             }
           }
         }
+      },
+      fizz: {
+        get
       }
     }
   });
@@ -89,5 +92,23 @@ it("merge state slices with path", () => {
   ).toEqual({
     value: 1,
     other: "junk"
+  });
+  expect(main.foo.bar.baz.get()).toEqual({
+    value: 1,
+    other: "junk"
+  });
+
+  expect(
+    main.foo.set({
+      state: { buzzer: "buzzworthy" },
+      path: ".fizz"
+    })
+  ).toEqual({
+    buzz: "fizzbuzz",
+    buzzer: "buzzworthy"
+  });
+  expect(main.fizz.get()).toEqual({
+    buzz: "fizzbuzz",
+    buzzer: "buzzworthy"
   });
 });

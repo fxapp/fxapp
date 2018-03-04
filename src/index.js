@@ -24,6 +24,18 @@ function get(path, from) {
   return from;
 }
 
+function resolvePathInNamespace(namespace, pathString) {
+  pathString = pathString || "";
+  var splitPath = pathString.split(".").filter(function(part) {
+    return part;
+  });
+  var fullNamespace =
+    pathString.startsWith(".") && splitPath.length
+      ? splitPath
+      : namespace.concat(splitPath);
+  return fullNamespace;
+}
+
 export function h() {
   if (typeof arguments[0] === "function") {
     return arguments[0](arguments[1] || {}, arguments[2]);
@@ -58,22 +70,15 @@ export function fxapp(props) {
   function wireFx(namespace, state, actions) {
     var defaultFx = {
       get: function(pathString) {
-        var pathString = pathString || "";
-        var splitPath = pathString.split(".").filter(function(part) {
-          return part;
-        });
-        var fullPath =
-          pathString.startsWith(".") && splitPath.length
-            ? splitPath
-            : namespace.concat(splitPath);
-        return get(fullPath, globalState);
+        var fullNamespace = resolvePathInNamespace(namespace, pathString);
+        return get(fullNamespace, globalState);
       },
       merge: function(partialState, path) {
         return [
           "merge",
           {
             partialState: partialState,
-            path: path || ""
+            path: path
           }
         ];
       }
@@ -81,8 +86,7 @@ export function fxapp(props) {
     var fxRunners = {
       merge: function(props) {
         var partialState = props.partialState;
-        var path = props.path.length ? props.path.split(".") : [];
-        var fullNamespace = namespace.concat(path);
+        var fullNamespace = resolvePathInNamespace(namespace, props.path);
         var updatedSlice = assign(
           get(fullNamespace, globalState),
           partialState
