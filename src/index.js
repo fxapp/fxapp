@@ -67,17 +67,26 @@ export function fxapp(props) {
     return get(fullPath, globalState);
   }
 
-  function mergeState(namespace, value) {
-    var updatedSlice = assign(get(namespace, globalState), value);
-    globalState = set(namespace, updatedSlice, globalState);
+  function mergeState(namespace, props) {
+    var partialState = props.partialState;
+    var path = props.path.length ? props.path.split(".") : [];
+    var fullNamespace = namespace.concat(path);
+    var updatedSlice = assign(get(fullNamespace, globalState), partialState);
+    globalState = set(fullNamespace, updatedSlice, globalState);
     return updatedSlice;
   }
 
   function wireFx(namespace, state, actions) {
     var defaultFx = {
       get: getState.bind(null, namespace),
-      merge: function(partialState) {
-        return ["merge", partialState];
+      merge: function(partialState, path) {
+        return [
+          "merge",
+          {
+            partialState: partialState,
+            path: path || ""
+          }
+        ];
       }
     };
     var fxRunners = {

@@ -21,6 +21,7 @@ const makeApp = () =>
       get,
       foo: {
         get,
+        set: fx => fx.merge(fx.data.state, fx.data.path),
         bar: {
           get,
           baz: {
@@ -73,5 +74,20 @@ it("merge and get deeply nested state slices", () => {
   expect(main.foo.bar.baz.get()).toEqual({
     value: 1,
     food: "banana"
+  });
+});
+
+it("merge state slices with path", () => {
+  const main = makeApp();
+  expect(
+    main.foo.set({
+      state: {
+        other: "junk"
+      },
+      path: "bar.baz"
+    })
+  ).toEqual({
+    value: 1,
+    other: "junk"
   });
 });
