@@ -8,14 +8,14 @@ env:
   - NODE_ENV=development
 
 before_install:
-  - npm i -g codecov
+  - npm i -g npx
 
 install:
   - npm i
 
 script:
-  - npm test
-  - codecov
+  - npm run build
+  - npx codecov
 
 notifications:
   email: false

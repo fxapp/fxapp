@@ -2,21 +2,36 @@
   "name": "fxapp",
   "description": "Build JavaScript apps using effects as data",
   "version": "0.0.1",
+  "main": "dist/fxapp.js",
   "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fxapp/fxapp.git"
   },
-  "files": ["src", "dist"],
-  "keywords": ["effects", "data", "vdom"],
+  "files": [
+    "src",
+    "dist"
+  ],
+  "keywords": [
+    "effects",
+    "data",
+    "vdom"
+  ],
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
-    "jest": "^22.0.4"
+    "jest": "^22.0.4",
+    "rollup": "^0.55.5",
+    "uglify-js": "^3.2.1"
   },
   "scripts": {
+    "format": "npx prettier --write {src,test}/**/*.js",
+    "format:check": "npx prettier --list-different {src,test}/**/*.js",
     "lint": "npx eslint {src,test}/**/*.js",
     "test": "jest --coverage --no-cache",
-    "format": "npx prettier --write {src,test}/**/*.js"
+    "bundle": "rollup -i src/index.js -o dist/fxapp.js -m -f umd -n fxapp",
+    "minify": "uglifyjs dist/fxapp.js -o dist/fxapp.js -mc --source-map includeSources,url=fxapp.js.map",
+    "build": "npm run format:check && npm run lint && npm t && npm run bundle && npm run minify",
+    "prepare": "npm run build"
   },
   "babel": {
     "presets": "env"
@@ -29,7 +44,9 @@
     "env": {
       "jest": true
     },
-    "rules": { "no-use-before-define": "error" }
+    "rules": {
+      "no-use-before-define": "error"
+    }
   },
   "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
   "license": "MIT",

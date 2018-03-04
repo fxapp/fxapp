@@ -1,8 +1,13 @@
 # Logs
 *.log*
+
+# Lock files
 yarn.lock
 package-lock.json
 
+# Build output
+dist/
+
 # Misc
-node_modules
-coverage
+node_modules/
+coverage/
