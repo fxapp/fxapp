@@ -77,13 +77,13 @@ export function h() {
   return vnode;
 }
 
-function runIfFx(fxRunners, maybeFx) {
+function runIfFx(maybeFx, fxRunners, getAction) {
   if (!isFx(maybeFx)) {
     // Not an effect
   } else if (isFx(maybeFx[0])) {
     // Run an array of effects
     for (var i in maybeFx) {
-      runIfFx(fxRunners, maybeFx[i]);
+      runIfFx(maybeFx[i], fxRunners, getAction);
     }
   } else if (maybeFx.length) {
     // Run a single effect
@@ -91,7 +91,7 @@ function runIfFx(fxRunners, maybeFx) {
     var fxProps = maybeFx[1];
     var fxRunner = fxRunners[fxType];
     if (isFn(fxRunner)) {
-      fxRunner(fxProps);
+      fxRunner(fxProps, getAction);
     } else {
       throw new Error("no such fx type: " + fxType);
     }
@@ -138,16 +138,23 @@ function makeIntrinsicFx(namespace, store) {
           }
         ];
       },
-      runner: function(fxProps) {
-        var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
-        var requestedAction = get(fullNamespace, store.actions);
-        if (!isFn(requestedAction)) {
-          throw new Error("couldn't find action: " + fullNamespace.join("."));
-        }
+      runner: function(fxProps, getAction) {
+        var requestedAction = getAction(fxProps.path);
         requestedAction(fxProps.data);
       }
     }
   ];
+}
+
+function makeGetAction(namespace, actions) {
+  return function(path) {
+    var fullNamespace = resolvePathInNamespace(namespace, path);
+    var requestedAction = get(fullNamespace, actions);
+    if (!isFn(requestedAction)) {
+      throw new Error("couldn't find action: " + fullNamespace.join("."));
+    }
+    return requestedAction;
+  };
 }
 
 export function fxapp(props) {
@@ -158,8 +165,10 @@ export function fxapp(props) {
 
   function wireFx(namespace, state, actions) {
     var intrinsicFx = makeIntrinsicFx(namespace, store);
-    var fxCreators = reduceByNameAndProp(intrinsicFx, "creator");
-    var fxRunners = reduceByNameAndProp(intrinsicFx, "runner");
+    var allFx = (props.fx || []).concat(intrinsicFx);
+    var fxCreators = reduceByNameAndProp(allFx, "creator");
+    var fxRunners = reduceByNameAndProp(allFx, "runner");
+    var getAction = makeGetAction(namespace, store.actions);
 
     for (var key in actions) {
       isFn(actions[key])
@@ -169,7 +178,7 @@ export function fxapp(props) {
                 data: data
               });
               var actionResult = action(actionFx);
-              runIfFx(fxRunners, actionResult);
+              runIfFx(actionResult, fxRunners, getAction);
               return actionResult;
             };
           })(key, actions[key])
