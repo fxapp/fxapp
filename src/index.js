@@ -43,6 +43,13 @@ function resolvePathInNamespace(namespace, path) {
   return fullNamespace;
 }
 
+function reduceByNameAndProp(items, prop) {
+  return items.reduce(function(others, next) {
+    others[next.name] = next[prop];
+    return others;
+  }, {});
+}
+
 export function h() {
   if (isFn(arguments[0])) {
     return arguments[0](arguments[1] || {}, arguments[2]);
@@ -70,17 +77,39 @@ export function h() {
   return vnode;
 }
 
-export function fxapp(props) {
-  var globalState = assign(props.state);
-  var wiredActions = assign(props.actions);
+function runIfFx(fxRunners, maybeFx) {
+  if (!isFx(maybeFx)) {
+    // Not an effect
+  } else if (isFx(maybeFx[0])) {
+    // Run an array of effects
+    for (var i in maybeFx) {
+      runIfFx(fxRunners, maybeFx[i]);
+    }
+  } else if (maybeFx.length) {
+    // Run a single effect
+    var fxType = maybeFx[0];
+    var fxProps = maybeFx[1];
+    var fxRunner = fxRunners[fxType];
+    if (isFn(fxRunner)) {
+      fxRunner(fxProps);
+    } else {
+      throw new Error("no such fx type: " + fxType);
+    }
+  }
+}
 
-  function wireFx(namespace, state, actions) {
-    var defaultFx = {
-      get: function(path) {
+function makeIntrinsicFx(namespace, store) {
+  return [
+    {
+      name: "get",
+      creator: function(path) {
         var prefixes = resolvePathInNamespace(namespace, path);
-        return get(prefixes, globalState);
-      },
-      merge: function(partialState, path) {
+        return get(prefixes, store.state);
+      }
+    },
+    {
+      name: "merge",
+      creator: function(partialState, path) {
         return [
           "merge",
           {
@@ -89,7 +118,18 @@ export function fxapp(props) {
           }
         ];
       },
-      action: function(path, data) {
+      runner: function(fxProps) {
+        var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
+        var updatedSlice = assign(
+          get(fullNamespace, store.state),
+          fxProps.partialState
+        );
+        store.state = set(fullNamespace, updatedSlice, store.state);
+      }
+    },
+    {
+      name: "action",
+      creator: function(path, data) {
         return [
           "action",
           {
@@ -97,52 +137,36 @@ export function fxapp(props) {
             data: data
           }
         ];
-      }
-    };
-    var fxRunners = {
-      merge: function(fxProps) {
-        var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
-        var updatedSlice = assign(
-          get(fullNamespace, globalState),
-          fxProps.partialState
-        );
-        globalState = set(fullNamespace, updatedSlice, globalState);
       },
-      action: function(fxProps) {
+      runner: function(fxProps) {
         var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
-        var requestedAction = get(fullNamespace, wiredActions);
+        var requestedAction = get(fullNamespace, store.actions);
         requestedAction(fxProps.data);
       }
-    };
-    function runIfFx(maybeFx) {
-      if (!isFx(maybeFx)) {
-        // Not an effect
-      } else if (isFx(maybeFx[0])) {
-        // Run an array of effects
-        for (var i in maybeFx) {
-          runIfFx(maybeFx[i]);
-        }
-      } else if (maybeFx.length) {
-        // Run a single effect
-        var fxType = maybeFx[0];
-        var fxProps = maybeFx[1];
-        var fxRunner = fxRunners[fxType];
-        if (isFn(fxRunner)) {
-          fxRunner(fxProps);
-        } else {
-          throw new Error("no such fx type: " + fxType);
-        }
-      }
     }
+  ];
+}
+
+export function fxapp(props) {
+  var store = {
+    state: assign(props.state),
+    actions: assign(props.actions)
+  };
+
+  function wireFx(namespace, state, actions) {
+    var intrinsicFx = makeIntrinsicFx(namespace, store);
+    var fxCreators = reduceByNameAndProp(intrinsicFx, "creator");
+    var fxRunners = reduceByNameAndProp(intrinsicFx, "runner");
+
     for (var key in actions) {
       isFn(actions[key])
         ? (function(key, action) {
             actions[key] = function(data) {
-              var actionFx = assign(defaultFx, {
+              var actionFx = assign(fxCreators, {
                 data: data
               });
               var actionResult = action(actionFx);
-              runIfFx(actionResult);
+              runIfFx(fxRunners, actionResult);
               return actionResult;
             };
           })(key, actions[key])
@@ -153,7 +177,7 @@ export function fxapp(props) {
           );
     }
   }
-  wireFx([], globalState, wiredActions);
+  wireFx([], store.state, store.actions);
 
-  return wiredActions;
+  return store.actions;
 }
