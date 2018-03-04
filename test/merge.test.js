@@ -1,6 +1,6 @@
 import { fxapp } from "../src";
 
-test("actions that can update state", () => {
+test("merge can update state", () => {
   const main = fxapp({
     state: {
       value: 0
@@ -26,18 +26,27 @@ test("actions that can update state", () => {
     value: 0
   });
 
-  expect(main.up(2)).toEqual({
-    value: 2
-  });
+  expect(main.up(2)).toEqual([
+    "merge",
+    {
+      partialState: {
+        value: 2
+      }
+    }
+  ]);
 
   expect(main.get()).toEqual({
     value: 2
   });
 
-  expect(main.set({ merge: "properties" })).toEqual({
-    value: 2,
-    merge: "properties"
-  });
+  expect(main.set({ merge: "properties" })).toEqual([
+    "merge",
+    {
+      partialState: {
+        merge: "properties"
+      }
+    }
+  ]);
 
   expect(main.get()).toEqual({
     value: 2,

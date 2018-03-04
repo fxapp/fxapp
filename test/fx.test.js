@@ -11,11 +11,11 @@ test("ignore empty fx", () => {
   expect(main.invalid()).toEqual([]);
 });
 
-test("ignore invalid fx", () => {
-  const main = fxapp({
-    actions: {
-      invalid: () => invalidFx
-    }
-  });
-  expect(main.invalid()).toEqual(invalidFx);
-});
+test("throw for invalid fx", () =>
+  expect(() =>
+    fxapp({
+      actions: {
+        invalid: () => invalidFx
+      }
+    }).invalid()
+  ).toThrow("no such fx type: invalid"));

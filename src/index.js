@@ -1,3 +1,8 @@
+var isFx = Array.isArray;
+var isFn = function(value) {
+  return typeof value === "function";
+};
+
 function assign(from, assignments) {
   var obj = {};
 
@@ -39,7 +44,7 @@ function resolvePathInNamespace(namespace, path) {
 }
 
 export function h() {
-  if (typeof arguments[0] === "function") {
+  if (isFn(arguments[0])) {
     return arguments[0](arguments[1] || {}, arguments[2]);
   }
   var vnode = [arguments[0]];
@@ -83,35 +88,61 @@ export function fxapp(props) {
             path: path
           }
         ];
+      },
+      action: function(path, data) {
+        return [
+          "action",
+          {
+            path: path,
+            data: data
+          }
+        ];
       }
     };
     var fxRunners = {
-      merge: function(props) {
-        var fullNamespace = resolvePathInNamespace(namespace, props.path);
+      merge: function(fxProps) {
+        var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
         var updatedSlice = assign(
           get(fullNamespace, globalState),
-          props.partialState
+          fxProps.partialState
         );
         globalState = set(fullNamespace, updatedSlice, globalState);
-        return updatedSlice;
+      },
+      action: function(fxProps) {
+        var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
+        var requestedAction = get(fullNamespace, wiredActions);
+        requestedAction(fxProps.data);
       }
     };
+    function runIfFx(maybeFx) {
+      if (!isFx(maybeFx)) {
+        // Not an effect
+      } else if (isFx(maybeFx[0])) {
+        // Run an array of effects
+        for (var i in maybeFx) {
+          runIfFx(maybeFx[i]);
+        }
+      } else if (maybeFx.length) {
+        // Run a single effect
+        var fxType = maybeFx[0];
+        var fxProps = maybeFx[1];
+        var fxRunner = fxRunners[fxType];
+        if (isFn(fxRunner)) {
+          fxRunner(fxProps);
+        } else {
+          throw new Error("no such fx type: " + fxType);
+        }
+      }
+    }
     for (var key in actions) {
-      typeof actions[key] === "function"
+      isFn(actions[key])
         ? (function(key, action) {
             actions[key] = function(data) {
               var actionFx = assign(defaultFx, {
                 data: data
               });
               var actionResult = action(actionFx);
-              if (Array.isArray(actionResult)) {
-                var fxType = actionResult[0];
-                var fxProps = actionResult[1];
-                var fxRunner = fxRunners[fxType];
-                if (typeof fxRunner === "function") {
-                  return fxRunner(fxProps);
-                }
-              }
+              runIfFx(actionResult);
               return actionResult;
             };
           })(key, actions[key])

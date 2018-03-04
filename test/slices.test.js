@@ -69,10 +69,14 @@ it("get state slices outside of current namespace", () => {
 it("merge and get deeply nested state slices", () => {
   const main = makeApp();
 
-  expect(main.foo.bar.baz.eat("banana")).toEqual({
-    value: 1,
-    food: "banana"
-  });
+  expect(main.foo.bar.baz.eat("banana")).toEqual([
+    "merge",
+    {
+      partialState: {
+        food: "banana"
+      }
+    }
+  ]);
 
   expect(main.foo.bar.baz.get()).toEqual({
     value: 1,
@@ -89,10 +93,15 @@ it("merge state slices with path", () => {
       },
       path: "bar.baz"
     })
-  ).toEqual({
-    value: 1,
-    other: "junk"
-  });
+  ).toEqual([
+    "merge",
+    {
+      path: "bar.baz",
+      partialState: {
+        other: "junk"
+      }
+    }
+  ]);
   expect(main.foo.bar.baz.get()).toEqual({
     value: 1,
     other: "junk"
@@ -103,10 +112,15 @@ it("merge state slices with path", () => {
       state: { buzzer: "buzzworthy" },
       path: ".fizz"
     })
-  ).toEqual({
-    buzz: "fizzbuzz",
-    buzzer: "buzzworthy"
-  });
+  ).toEqual([
+    "merge",
+    {
+      path: ".fizz",
+      partialState: {
+        buzzer: "buzzworthy"
+      }
+    }
+  ]);
   expect(main.fizz.get()).toEqual({
     buzz: "fizzbuzz",
     buzzer: "buzzworthy"
