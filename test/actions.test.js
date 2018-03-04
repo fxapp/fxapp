@@ -1,7 +1,7 @@
 import { fxapp } from "../src";
 
 test("actions that can update state", () => {
-  const actions = fxapp({
+  const main = fxapp({
     state: {
       value: 0
     },
@@ -22,24 +22,24 @@ test("actions that can update state", () => {
     }
   });
 
-  expect(actions.get()).toEqual({
+  expect(main.get()).toEqual({
     value: 0
   });
 
-  expect(actions.up(2)).toEqual({
+  expect(main.up(2)).toEqual({
     value: 2
   });
 
-  expect(actions.get()).toEqual({
+  expect(main.get()).toEqual({
     value: 2
   });
 
-  expect(actions.set({ merge: "properties" })).toEqual({
+  expect(main.set({ merge: "properties" })).toEqual({
     value: 2,
     merge: "properties"
   });
 
-  expect(actions.get()).toEqual({
+  expect(main.get()).toEqual({
     value: 2,
     merge: "properties"
   });

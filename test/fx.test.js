@@ -3,19 +3,19 @@ import { fxapp } from "../src";
 const invalidFx = ["invalid", { ignore: "me" }];
 
 test("ignore empty fx", () => {
-  const actions = fxapp({
+  const main = fxapp({
     actions: {
       invalid: () => []
     }
   });
-  expect(actions.invalid()).toEqual([]);
+  expect(main.invalid()).toEqual([]);
 });
 
 test("ignore invalid fx", () => {
-  const actions = fxapp({
+  const main = fxapp({
     actions: {
       invalid: () => invalidFx
     }
   });
-  expect(actions.invalid()).toEqual(invalidFx);
+  expect(main.invalid()).toEqual(invalidFx);
 });

@@ -14,7 +14,7 @@ const state = {
 };
 
 const get = fx => fx.get(fx.data);
-const getActions = () =>
+const makeApp = () =>
   fxapp({
     state,
     actions: {
@@ -37,40 +37,40 @@ const getActions = () =>
   });
 
 it("get state slices by default path", () => {
-  const actions = getActions();
+  const main = makeApp();
 
   // get slices using default and path
-  expect(actions.get()).toEqual(state);
-  expect(actions.foo.get(null)).toEqual(state.foo);
-  expect(actions.foo.bar.get("")).toEqual(state.foo.bar);
-  expect(actions.foo.bar.baz.get(".")).toEqual(state.foo.bar.baz);
+  expect(main.get()).toEqual(state);
+  expect(main.foo.get(null)).toEqual(state.foo);
+  expect(main.foo.bar.get("")).toEqual(state.foo.bar);
+  expect(main.foo.bar.baz.get(".")).toEqual(state.foo.bar.baz);
 });
 
 it("get state slices with custom path", () => {
-  const actions = getActions();
+  const main = makeApp();
 
-  expect(actions.get("foo")).toEqual(state.foo);
-  expect(actions.get("foo.bar")).toEqual(state.foo.bar);
-  expect(actions.get("foo.bar.baz")).toEqual(state.foo.bar.baz);
+  expect(main.get("foo")).toEqual(state.foo);
+  expect(main.get("foo.bar")).toEqual(state.foo.bar);
+  expect(main.get("foo.bar.baz")).toEqual(state.foo.bar.baz);
 });
 
 it("get state slices outside of current namespace", () => {
-  const actions = getActions();
+  const main = makeApp();
 
   // get other slice data with dot prefix
-  expect(actions.foo.bar.baz.get(".fizz")).toEqual(state.fizz);
-  expect(actions.foo.bar.baz.get(".fizz.buzz")).toEqual(state.fizz.buzz);
+  expect(main.foo.bar.baz.get(".fizz")).toEqual(state.fizz);
+  expect(main.foo.bar.baz.get(".fizz.buzz")).toEqual(state.fizz.buzz);
 });
 
 it("merge and get deeply nested state slices", () => {
-  const actions = getActions();
+  const main = makeApp();
 
-  expect(actions.foo.bar.baz.eat("banana")).toEqual({
+  expect(main.foo.bar.baz.eat("banana")).toEqual({
     value: 1,
     food: "banana"
   });
 
-  expect(actions.foo.bar.baz.get()).toEqual({
+  expect(main.foo.bar.baz.get()).toEqual({
     value: 1,
     food: "banana"
   });
