@@ -1,5 +1,23 @@
 import { fxapp } from "../src";
 
+test("throw for unknown action", () =>
+  expect(() =>
+    fxapp({
+      actions: {
+        foo: fx => fx.action("unknown")
+      }
+    }).foo()
+  ).toThrow("couldn't find action: unknown"));
+
+test("throw for unknown slice action", () =>
+  expect(() =>
+    fxapp({
+      actions: {
+        foo: fx => fx.action("uh.oh")
+      }
+    }).foo()
+  ).toThrow("couldn't find action: uh.oh"));
+
 test("run action fx", done => {
   const main = fxapp({
     state: {

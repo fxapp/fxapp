@@ -26,7 +26,7 @@ function set(prefixes, value, from) {
 
 function get(prefixes, from) {
   for (var i = 0; i < prefixes.length; i++) {
-    from = from[prefixes[i]];
+    from = from && from[prefixes[i]];
   }
   return from;
 }
@@ -141,6 +141,9 @@ function makeIntrinsicFx(namespace, store) {
       runner: function(fxProps) {
         var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
         var requestedAction = get(fullNamespace, store.actions);
+        if (!isFn(requestedAction)) {
+          throw new Error("couldn't find action: " + fullNamespace.join("."));
+        }
         requestedAction(fxProps.data);
       }
     }

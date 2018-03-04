@@ -1,7 +1,5 @@
 import { fxapp } from "../src";
 
-const invalidFx = ["invalid", { ignore: "me" }];
-
 test("ignore empty fx", () => {
   const main = fxapp({
     actions: {
@@ -15,7 +13,7 @@ test("throw for invalid fx", () =>
   expect(() =>
     fxapp({
       actions: {
-        invalid: () => invalidFx
+        invalid: () => ["invalid"]
       }
     }).invalid()
   ).toThrow("no such fx type: invalid"));
