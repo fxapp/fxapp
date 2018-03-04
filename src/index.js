@@ -7,30 +7,32 @@ function assign(from, assignments) {
   return obj;
 }
 
-function set(path, value, from) {
+function set(prefixes, value, from) {
   var target = {};
-  if (path.length) {
-    target[path[0]] =
-      path.length > 1 ? set(path.slice(1), value, from[path[0]]) : value;
+  if (prefixes.length) {
+    target[prefixes[0]] =
+      prefixes.length > 1
+        ? set(prefixes.slice(1), value, from[prefixes[0]])
+        : value;
     return assign(from, target);
   }
   return value;
 }
 
-function get(path, from) {
-  for (var i = 0; i < path.length; i++) {
-    from = from[path[i]];
+function get(prefixes, from) {
+  for (var i = 0; i < prefixes.length; i++) {
+    from = from[prefixes[i]];
   }
   return from;
 }
 
-function resolvePathInNamespace(namespace, pathString) {
-  pathString = pathString || "";
-  var splitPath = pathString.split(".").filter(function(part) {
+function resolvePathInNamespace(namespace, path) {
+  path = path || "";
+  var splitPath = path.split(".").filter(function(part) {
     return part;
   });
   var fullNamespace =
-    pathString.startsWith(".") && splitPath.length
+    path.startsWith(".") && splitPath.length
       ? splitPath
       : namespace.concat(splitPath);
   return fullNamespace;
@@ -69,9 +71,9 @@ export function fxapp(props) {
 
   function wireFx(namespace, state, actions) {
     var defaultFx = {
-      get: function(pathString) {
-        var fullNamespace = resolvePathInNamespace(namespace, pathString);
-        return get(fullNamespace, globalState);
+      get: function(path) {
+        var prefixes = resolvePathInNamespace(namespace, path);
+        return get(prefixes, globalState);
       },
       merge: function(partialState, path) {
         return [
@@ -85,11 +87,10 @@ export function fxapp(props) {
     };
     var fxRunners = {
       merge: function(props) {
-        var partialState = props.partialState;
         var fullNamespace = resolvePathInNamespace(namespace, props.path);
         var updatedSlice = assign(
           get(fullNamespace, globalState),
-          partialState
+          props.partialState
         );
         globalState = set(fullNamespace, updatedSlice, globalState);
         return updatedSlice;
