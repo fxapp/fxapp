@@ -46,8 +46,7 @@ test("skip undefined children", () => {
 });
 
 test("component with no props", () => {
-  const Component = ({ name = "world" }, children) => h("div", "Hello " + name);
-
+  const Component = ({ name = "world" }) => h("div", "Hello " + name);
   expect(h(Component)).toEqual(["div", ["Hello world"]]);
 });
 

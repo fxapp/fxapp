@@ -14,11 +14,22 @@
     "jest": "^22.0.4"
   },
   "scripts": {
+    "lint": "npx eslint {src,test}/**/*.js",
     "test": "jest --coverage --no-cache",
     "format": "npx prettier --write {src,test}/**/*.js"
   },
   "babel": {
     "presets": "env"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "env": {
+      "jest": true
+    },
+    "rules": { "no-use-before-define": "error" }
   },
   "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
   "license": "MIT",
