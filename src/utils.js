@@ -1,5 +1,3 @@
-export var isFx = Array.isArray;
-
 export function isFn(value) {
   return typeof value === "function";
 }

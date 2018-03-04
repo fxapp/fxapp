@@ -1,5 +1,5 @@
-import { isFn, assign, reduceByNameAndProp } from "./util";
-import { runIfFx, makeIntrinsicFx, makeGetAction } from "./fxUtil";
+import { isFn, assign, reduceByNameAndProp } from "./utils";
+import { runIfFx, makeIntrinsicFx, makeGetAction } from "./fxUtils";
 
 export function fxapp(props) {
   var store = {

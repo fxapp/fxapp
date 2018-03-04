@@ -1,6 +1,8 @@
-import { isFx, isFn, assign, set, get } from "./util";
+import { isFn, assign, set, get } from "./utils";
 
-export function resolvePathInNamespace(namespace, path) {
+var isFx = Array.isArray;
+
+function resolvePathInNamespace(namespace, path) {
   path = path || "";
   var splitPath = path.split(".").filter(function(part) {
     return part;

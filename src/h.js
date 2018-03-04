@@ -1,4 +1,4 @@
-import { isFn } from "./util";
+import { isFn } from "./utils";
 
 export function h() {
   if (isFn(arguments[0])) {
