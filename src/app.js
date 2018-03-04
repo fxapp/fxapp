@@ -1,5 +1,6 @@
-import { isFn, assign, reduceByNameAndProp } from "./utils";
-import { runIfFx, makeIntrinsicFx, makeGetAction } from "./fxUtils";
+import { isFn, assign } from "./utils";
+import { makeFx } from "./fxUtils";
+import { patch } from "./patch";
 
 export function app(props) {
   var store = {
@@ -8,21 +9,17 @@ export function app(props) {
   };
 
   function wireFx(namespace, state, actions) {
-    var intrinsicFx = makeIntrinsicFx(namespace, store);
-    var allFx = (props.fx || []).concat(intrinsicFx);
-    var fxCreators = reduceByNameAndProp(allFx, "creator");
-    var fxRunners = reduceByNameAndProp(allFx, "runner");
-    var getAction = makeGetAction(namespace, store.actions);
+    var sliceFx = makeFx(namespace, store, props.fx);
 
     for (var key in actions) {
       isFn(actions[key])
         ? (function(key, action) {
             actions[key] = function(data) {
-              var actionFx = assign(fxCreators, {
+              var actionFx = assign(sliceFx.creators, {
                 data: data
               });
               var actionResult = action(actionFx);
-              runIfFx(actionResult, fxRunners, getAction);
+              sliceFx.run(actionResult);
               return actionResult;
             };
           })(key, actions[key])
@@ -34,6 +31,18 @@ export function app(props) {
     }
   }
   wireFx([], store.state, store.actions);
+
+  var rootFx = makeFx([], store, props.fx);
+  var container = props.container || document.body;
+  function render() {
+    var nextNode = props.view(rootFx.creators);
+    patch(nextNode, container, rootFx.run);
+  }
+
+  if (isFn(props.view)) {
+    store.subscribe = render;
+    render();
+  }
 
   return store.actions;
 }

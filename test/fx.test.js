@@ -18,7 +18,7 @@ test("throw for invalid fx", () =>
     }).invalid()
   ).toThrow("no such fx type: invalid"));
 
-test("allow adding new custom effect", () => {
+test("allow adding new custom fx", () => {
   const externalState = { value: 2 };
 
   const main = app({

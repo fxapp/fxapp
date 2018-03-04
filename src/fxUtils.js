@@ -1,6 +1,6 @@
-import { isFn, assign, set, get } from "./utils";
+import { isFn, assign, set, get, reduceByNameAndProp } from "./utils";
 
-var isFx = Array.isArray;
+export var isFx = Array.isArray;
 
 function resolvePathInNamespace(namespace, path) {
   path = path || "";
@@ -62,6 +62,9 @@ export function makeIntrinsicFx(namespace, store) {
           fxProps.partialState
         );
         store.state = set(fullNamespace, updatedSlice, store.state);
+        if (isFn(store.subscribe)) {
+          store.subscribe(store.state);
+        }
       }
     },
     {
@@ -91,5 +94,18 @@ export function makeGetAction(namespace, actions) {
       throw new Error("couldn't find action: " + fullNamespace.join("."));
     }
     return requestedAction;
+  };
+}
+
+export function makeFx(namespace, store, userFx) {
+  var intrinsicFx = makeIntrinsicFx(namespace, store);
+  var allFx = (userFx || []).concat(intrinsicFx);
+  var fxRunners = reduceByNameAndProp(allFx, "runner");
+  var getAction = makeGetAction(namespace, store.actions);
+  return {
+    creators: reduceByNameAndProp(allFx, "creator"),
+    run: function(maybeFx) {
+      runIfFx(maybeFx, fxRunners, getAction);
+    }
   };
 }
