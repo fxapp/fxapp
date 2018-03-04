@@ -1,7 +1,7 @@
 import { isFn, assign, reduceByNameAndProp } from "./utils";
 import { runIfFx, makeIntrinsicFx, makeGetAction } from "./fxUtils";
 
-export function fxapp(props) {
+export function app(props) {
   var store = {
     state: assign(props.state),
     actions: assign(props.actions)

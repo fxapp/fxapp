@@ -1,4 +1,4 @@
-import { fxapp } from "../src";
+import { app } from "../src";
 
 const state = {
   foo: {
@@ -15,7 +15,7 @@ const state = {
 
 const get = fx => fx.get(fx.data);
 const makeApp = () =>
-  fxapp({
+  app({
     state,
     actions: {
       get,

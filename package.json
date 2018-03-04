@@ -28,7 +28,7 @@
     "format:check": "npx prettier --list-different {src,test}/**/*.js",
     "lint": "npx eslint {src,test}/**/*.js",
     "test": "jest --coverage --no-cache",
-    "bundle": "rollup -i src/index.js -o dist/fxapp.js -m -f umd -n fxapp",
+    "bundle": "rollup -i src/index.js -o dist/fxapp.js -m -f umd -n fx",
     "minify": "uglifyjs dist/fxapp.js -o dist/fxapp.js -mc --source-map includeSources,url=fxapp.js.map",
     "build": "npm run format:check && npm run lint && npm t && npm run bundle && npm run minify",
     "prepare": "npm run build"

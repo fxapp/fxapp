@@ -1,7 +1,7 @@
-import { fxapp } from "../src";
+import { app } from "../src";
 
 test("merge can update state", () => {
-  const main = fxapp({
+  const main = app({
     state: {
       value: 0
     },

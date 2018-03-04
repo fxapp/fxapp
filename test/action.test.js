@@ -1,8 +1,8 @@
-import { fxapp } from "../src";
+import { app } from "../src";
 
 test("throw for unknown action", () =>
   expect(() =>
-    fxapp({
+    app({
       actions: {
         foo: fx => fx.action("unknown")
       }
@@ -11,7 +11,7 @@ test("throw for unknown action", () =>
 
 test("throw for unknown slice action", () =>
   expect(() =>
-    fxapp({
+    app({
       actions: {
         foo: fx => fx.action("uh.oh")
       }
@@ -19,7 +19,7 @@ test("throw for unknown slice action", () =>
   ).toThrow("couldn't find action: uh.oh"));
 
 test("run action fx", done => {
-  const main = fxapp({
+  const main = app({
     state: {
       value: 0
     },
@@ -43,7 +43,7 @@ test("run action fx", done => {
 });
 
 test("run multiple action fx", done =>
-  fxapp({
+  app({
     state: {
       value: 0
     },
@@ -65,7 +65,7 @@ test("run multiple action fx", done =>
   }).foo());
 
 test("run slice action fx", done =>
-  fxapp({
+  app({
     actions: {
       foo: fx => fx.action("bar.baz", { some: "data" }),
       bar: {
@@ -78,7 +78,7 @@ test("run slice action fx", done =>
   }).foo());
 
 test("run slice action fx outside of current namespace", done =>
-  fxapp({
+  app({
     actions: {
       foo: {
         bar: {

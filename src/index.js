@@ -1,2 +1,2 @@
 export { h } from "./h";
-export { fxapp } from "./fxapp";
+export { app } from "./app";

@@ -1,7 +1,7 @@
-import { fxapp } from "../src";
+import { app } from "../src";
 
 test("ignore empty fx", () => {
-  const main = fxapp({
+  const main = app({
     actions: {
       invalid: () => []
     }
@@ -11,7 +11,7 @@ test("ignore empty fx", () => {
 
 test("throw for invalid fx", () =>
   expect(() =>
-    fxapp({
+    app({
       actions: {
         invalid: () => ["invalid"]
       }
@@ -21,7 +21,7 @@ test("throw for invalid fx", () =>
 test("allow adding new custom effect", () => {
   const externalState = { value: 2 };
 
-  const main = fxapp({
+  const main = app({
     fx: [
       {
         name: "set",
