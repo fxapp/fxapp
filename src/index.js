@@ -55,30 +55,19 @@ export function fxapp(props) {
   var globalState = assign(props.state);
   var wiredActions = assign(props.actions);
 
-  function getState(namespace, path) {
-    var path = path || "";
-    var splitPath = path.split(".").filter(function(part) {
-      return part;
-    });
-    var fullPath =
-      path.startsWith(".") && splitPath.length
-        ? splitPath
-        : namespace.concat(splitPath);
-    return get(fullPath, globalState);
-  }
-
-  function mergeState(namespace, props) {
-    var partialState = props.partialState;
-    var path = props.path.length ? props.path.split(".") : [];
-    var fullNamespace = namespace.concat(path);
-    var updatedSlice = assign(get(fullNamespace, globalState), partialState);
-    globalState = set(fullNamespace, updatedSlice, globalState);
-    return updatedSlice;
-  }
-
   function wireFx(namespace, state, actions) {
     var defaultFx = {
-      get: getState.bind(null, namespace),
+      get: function(pathString) {
+        var pathString = pathString || "";
+        var splitPath = pathString.split(".").filter(function(part) {
+          return part;
+        });
+        var fullPath =
+          pathString.startsWith(".") && splitPath.length
+            ? splitPath
+            : namespace.concat(splitPath);
+        return get(fullPath, globalState);
+      },
       merge: function(partialState, path) {
         return [
           "merge",
@@ -90,8 +79,16 @@ export function fxapp(props) {
       }
     };
     var fxRunners = {
-      merge: function(namespace, props) {
-        return mergeState(namespace, props);
+      merge: function(props) {
+        var partialState = props.partialState;
+        var path = props.path.length ? props.path.split(".") : [];
+        var fullNamespace = namespace.concat(path);
+        var updatedSlice = assign(
+          get(fullNamespace, globalState),
+          partialState
+        );
+        globalState = set(fullNamespace, updatedSlice, globalState);
+        return updatedSlice;
       }
     };
     for (var key in actions) {
@@ -107,7 +104,7 @@ export function fxapp(props) {
                 var fxProps = actionResult[1];
                 var fxRunner = fxRunners[fxType];
                 if (typeof fxRunner === "function") {
-                  return fxRunner(namespace, fxProps);
+                  return fxRunner(fxProps);
                 }
               }
               return actionResult;
