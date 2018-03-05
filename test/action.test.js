@@ -4,7 +4,7 @@ test("throw for unknown action", () =>
   expect(() =>
     app({
       actions: {
-        foo: fx => fx.action("unknown")
+        foo: ({ fx }) => fx.action("unknown")
       }
     }).foo()
   ).toThrow("couldn't find action: unknown"));
@@ -13,7 +13,7 @@ test("throw for unknown slice action", () =>
   expect(() =>
     app({
       actions: {
-        foo: fx => fx.action("uh.oh")
+        foo: ({ fx }) => fx.action("uh.oh")
       }
     }).foo()
   ).toThrow("couldn't find action: uh.oh"));
@@ -24,10 +24,10 @@ test("run action fx", done => {
       value: 0
     },
     actions: {
-      foo: fx => fx.action("bar", { some: "data" }),
-      bar: fx => {
-        expect(fx.data).toEqual({ some: "data" });
-        expect(fx.get()).toEqual({ value: 0 });
+      foo: ({ fx }) => fx.action("bar", { some: "data" }),
+      bar: ({ state, data }) => {
+        expect(data).toEqual({ some: "data" });
+        expect(state).toEqual({ value: 0 });
         done();
       }
     }
@@ -48,17 +48,17 @@ test("run multiple action fx", done =>
       value: 0
     },
     actions: {
-      foo: fx => [
+      foo: ({ fx }) => [
         fx.action("bar", { some: "data" }),
         fx.action("baz", { other: "data" })
       ],
-      bar: fx => {
-        expect(fx.data).toEqual({ some: "data" });
-        expect(fx.get()).toEqual({ value: 0 });
+      bar: ({ state, data }) => {
+        expect(data).toEqual({ some: "data" });
+        expect(state).toEqual({ value: 0 });
       },
-      baz: fx => {
-        expect(fx.data).toEqual({ other: "data" });
-        expect(fx.get()).toEqual({ value: 0 });
+      baz: ({ state, data }) => {
+        expect(data).toEqual({ other: "data" });
+        expect(state).toEqual({ value: 0 });
         done();
       }
     }
@@ -67,10 +67,10 @@ test("run multiple action fx", done =>
 test("run slice action fx", done =>
   app({
     actions: {
-      foo: fx => fx.action("bar.baz", { some: "data" }),
+      foo: ({ fx }) => fx.action("bar.baz", { some: "data" }),
       bar: {
-        baz: fx => {
-          expect(fx.data).toEqual({ some: "data" });
+        baz: ({ data }) => {
+          expect(data).toEqual({ some: "data" });
           done();
         }
       }
@@ -82,12 +82,12 @@ test("run slice action fx outside of current namespace", done =>
     actions: {
       foo: {
         bar: {
-          baz: fx => fx.action(".fizz.buzz", { some: "data" })
+          baz: ({ fx }) => fx.action(".fizz.buzz", { some: "data" })
         }
       },
       fizz: {
-        buzz: fx => {
-          expect(fx.data).toEqual({ some: "data" });
+        buzz: ({ data }) => {
+          expect(data).toEqual({ some: "data" });
           done();
         }
       }

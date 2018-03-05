@@ -13,7 +13,7 @@ const state = {
   }
 };
 
-const get = fx => fx.get(fx.data);
+const get = ({ state }) => state;
 const makeApp = () =>
   app({
     state,
@@ -21,15 +21,15 @@ const makeApp = () =>
       get,
       foo: {
         get,
-        set: fx => fx.merge(fx.data.state, fx.data.path),
+        set: ({ data, fx }) => fx.merge(data.state, data.path),
         bar: {
           get,
           baz: {
             get,
-            eat: fx => {
-              expect(fx.get()).toEqual({ value: 1 });
-              expect(fx.data).toBe("banana");
-              return fx.merge({ food: fx.data });
+            eat: ({ state, data, fx }) => {
+              expect(state).toEqual({ value: 1 });
+              expect(data).toBe("banana");
+              return fx.merge({ food: data });
             }
           }
         }
@@ -43,30 +43,13 @@ const makeApp = () =>
 it("get state slices by default path", () => {
   const main = makeApp();
 
-  // get slices using default and path
   expect(main.get()).toEqual(state);
   expect(main.foo.get(null)).toEqual(state.foo);
   expect(main.foo.bar.get("")).toEqual(state.foo.bar);
   expect(main.foo.bar.baz.get(".")).toEqual(state.foo.bar.baz);
 });
 
-it("get state slices with custom path", () => {
-  const main = makeApp();
-
-  expect(main.get("foo")).toEqual(state.foo);
-  expect(main.get("foo.bar")).toEqual(state.foo.bar);
-  expect(main.get("foo.bar.baz")).toEqual(state.foo.bar.baz);
-});
-
-it("get state slices outside of current namespace", () => {
-  const main = makeApp();
-
-  // get other slice data with dot prefix
-  expect(main.foo.bar.baz.get(".fizz")).toEqual(state.fizz);
-  expect(main.foo.bar.baz.get(".fizz.buzz")).toEqual(state.fizz.buzz);
-});
-
-it("merge and get deeply nested state slices", () => {
+it("merge deeply nested state slices", () => {
   const main = makeApp();
 
   expect(main.foo.bar.baz.eat("banana")).toEqual([
