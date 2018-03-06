@@ -1,7 +1,7 @@
 {
   "name": "fxapp",
   "description": "Build JavaScript apps using effects as data",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/fxapp.js",
   "module": "src/index.js",
   "repository": {
