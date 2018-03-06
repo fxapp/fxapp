@@ -3,10 +3,10 @@ import { app } from "../src";
 test("ignore empty fx", () => {
   const main = app({
     actions: {
-      invalid: () => []
+      empty: () => []
     }
   });
-  expect(main.invalid()).toEqual([]);
+  expect(main.empty()).toEqual([]);
 });
 
 test("throw for invalid fx", () =>
