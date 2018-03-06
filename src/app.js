@@ -1,4 +1,4 @@
-import { isFn, assign } from "./utils";
+import { isFn, assign, get } from "./utils";
 import { makeFx } from "./fxUtils";
 import { patch } from "./patch";
 
@@ -15,10 +15,11 @@ export function app(props) {
       isFn(actions[key])
         ? (function(key, action) {
             actions[key] = function(data) {
-              var actionFx = assign(sliceFx.creators, {
-                data: data
+              var actionResult = action({
+                state: get(namespace, store.state),
+                data: data,
+                fx: sliceFx.creators
               });
-              var actionResult = action(actionFx);
               sliceFx.run(actionResult);
               return actionResult;
             };
@@ -35,7 +36,10 @@ export function app(props) {
   var rootFx = makeFx([], store, props.fx);
   var container = props.container || document.body;
   function render() {
-    var nextNode = props.view(rootFx.creators);
+    var nextNode = props.view({
+      state: store.state,
+      fx: rootFx.creators
+    });
     patch(nextNode, container, rootFx.run);
   }
 

@@ -38,22 +38,12 @@ export function runIfFx(maybeFx, fxRunners, getAction) {
 export function makeIntrinsicFx(namespace, store) {
   return [
     {
-      name: "get",
-      creator: function(path) {
-        var prefixes = resolvePathInNamespace(namespace, path);
-        return get(prefixes, store.state);
-      }
-    },
-    {
       name: "merge",
       creator: function(partialState, path) {
-        return [
-          "merge",
-          {
-            partialState: partialState,
-            path: path
-          }
-        ];
+        return {
+          partialState: partialState,
+          path: path
+        };
       },
       runner: function(fxProps) {
         var fullNamespace = resolvePathInNamespace(namespace, fxProps.path);
@@ -70,13 +60,10 @@ export function makeIntrinsicFx(namespace, store) {
     {
       name: "action",
       creator: function(path, data) {
-        return [
-          "action",
-          {
-            path: path,
-            data: data
-          }
-        ];
+        return {
+          path: path,
+          data: data
+        };
       },
       runner: function(fxProps, getAction) {
         var requestedAction = getAction(fxProps.path);
@@ -97,13 +84,23 @@ export function makeGetAction(namespace, actions) {
   };
 }
 
+function makeFxCreator(name, fxCreator) {
+  return function() {
+    return [name, fxCreator.apply(null, arguments)];
+  };
+}
+
 export function makeFx(namespace, store, userFx) {
   var intrinsicFx = makeIntrinsicFx(namespace, store);
   var allFx = (userFx || []).concat(intrinsicFx);
+  var fxCreators = reduceByNameAndProp(allFx, "creator");
+  for (var name in fxCreators) {
+    fxCreators[name] = makeFxCreator(name, fxCreators[name]);
+  }
   var fxRunners = reduceByNameAndProp(allFx, "runner");
   var getAction = makeGetAction(namespace, store.actions);
   return {
-    creators: reduceByNameAndProp(allFx, "creator"),
+    creators: fxCreators,
     run: function(maybeFx) {
       runIfFx(maybeFx, fxRunners, getAction);
     }

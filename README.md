@@ -12,17 +12,17 @@ fx.app({
     count: 0
   },
   actions: {
-    down: fx => fx.merge({ count: fx.get("count") - 1 }),
-    up: fx => fx.merge({ count: fx.get("count") + 1 })
+    down: ({ state, fx }) => fx.merge({ count: state.count - 1 }),
+    up: ({ state, fx }) => fx.merge({ count: state.count + 1 })
   },
-  view: fx => [
+  view: ({ state, fx }) => [
     "main",
-    ["h1", fx.get("count")],
+    ["h1", state.count],
     [
       "button",
       {
         onclick: fx.action("down"),
-        disabled: fx.get("count") <= 0
+        disabled: state.count <= 0
       },
       "-"
     ],

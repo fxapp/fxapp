@@ -6,18 +6,18 @@ test("merge can update state", () => {
       value: 0
     },
     actions: {
-      get: fx => fx.get(),
-      up: fx => {
-        expect(fx.get()).toEqual({ value: 0 });
-        expect(fx.data).toBe(2);
+      get: ({ state }) => state,
+      up: ({ state, data, fx }) => {
+        expect(state).toEqual({ value: 0 });
+        expect(data).toBe(2);
         return fx.merge({
-          value: fx.get("value") + fx.data
+          value: state.value + data
         });
       },
-      set: fx => {
-        expect(fx.get()).toEqual({ value: 2 });
-        expect(fx.data).toEqual({ merge: "properties" });
-        return fx.merge(fx.data);
+      set: ({ state, data, fx }) => {
+        expect(state).toEqual({ value: 2 });
+        expect(data).toEqual({ merge: "properties" });
+        return fx.merge(data);
       }
     }
   });
