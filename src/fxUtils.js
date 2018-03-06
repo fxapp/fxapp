@@ -52,8 +52,8 @@ export function makeIntrinsicFx(namespace, store) {
           fxProps.partialState
         );
         store.state = set(fullNamespace, updatedSlice, store.state);
-        if (isFn(store.subscribe)) {
-          store.subscribe(store.state);
+        if (isFn(store.onchange)) {
+          store.onchange(store.state);
         }
       }
     },

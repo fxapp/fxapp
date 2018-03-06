@@ -44,7 +44,7 @@ export function app(props) {
   }
 
   if (isFn(props.view)) {
-    store.subscribe = render;
+    store.onchange = render;
     render();
   }
 
