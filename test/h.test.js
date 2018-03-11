@@ -43,11 +43,16 @@ test("pass through Boolean children", () => {
   expect(h("div", false)).toEqual(["div", false]);
 });
 
-test("pass through null children", () =>
-  expect(h("div", null)).toEqual(["div", null]));
+test("skip null children", () => expect(h("div", null)).toEqual(["div"]));
 
 test("skip undefined children", () =>
   expect(h("div", undefined)).toEqual(["div"]));
+
+test("pass through other falsy children", () => {
+  expect(h("div", 0)).toEqual(["div", 0]);
+  expect(h("div", NaN)).toEqual(["div", NaN]);
+  expect(h("div", "")).toEqual(["div", ""]);
+});
 
 test("component with no props", () => {
   const Component = ({ name = "world" }) => h("div", "Hello " + name);
@@ -104,8 +109,7 @@ test("JSX output", () =>
     )
   ).toEqual([
     "main",
-    null,
-    ["h1", null, 1],
+    ["h1", 1],
     ["button", { onclick: ["action", { path: "down" }] }, "-"],
     [
       "button",

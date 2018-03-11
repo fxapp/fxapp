@@ -1,11 +1,12 @@
 import { isFn } from "./utils";
 
-export function h() {
-  if (isFn(arguments[0])) {
-    return arguments[0](arguments[1] || {}, arguments[2]);
+export function h(type, props, children) {
+  var args = arguments;
+  if (isFn(type)) {
+    return type(props || {}, children);
   }
-  var vnode = [].filter.call(arguments, function(node) {
-    return node !== undefined;
+  var vnode = [].filter.call(args, function(node) {
+    return node != null;
   });
 
   return vnode;
