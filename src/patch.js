@@ -4,7 +4,7 @@ var lifecycleEvents = ["oncreate"];
 
 export function patch(node, container, runFx) {
   function updateAttribute(element, name, value) {
-    if (name === "style") {
+    if (name === "style" && typeof value === "object") {
       for (var i in value) {
         element[name][i] = value == null || value[i] == null ? "" : value[i];
       }
