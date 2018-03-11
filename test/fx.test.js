@@ -24,7 +24,7 @@ test("allow adding new custom fx", () => {
   const main = app({
     fx: [
       {
-        name: "set",
+        name: "xternal",
         creator: action => ({ action }),
         runner(props, getAction) {
           getAction(props.action)(externalState);
@@ -35,7 +35,7 @@ test("allow adding new custom fx", () => {
       value: 0
     },
     actions: {
-      foo: ({ fx }) => fx.set("set"),
+      foo: ({ fx }) => fx.xternal("set"),
       set: ({ data, fx }) => fx.merge(data),
       get: ({ state }) => state
     }
