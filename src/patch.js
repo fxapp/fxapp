@@ -1,6 +1,8 @@
 import { assign } from "./utils";
 import { isFx } from "./fxUtils";
 
+var lifecycleEvents = ["oncreate"];
+
 export function patch(node, container, runFx) {
   function updateAttribute(element, name, value, oldValue) {
     if (name === "style") {
@@ -17,7 +19,11 @@ export function patch(node, container, runFx) {
         } else {
           element[name] = value == null ? "" : value;
         }
-      } else if (value != null && value !== false) {
+      } else if (
+        value != null &&
+        value !== false &&
+        lifecycleEvents.indexOf(name) === -1
+      ) {
         element.setAttribute(name, value);
       }
     }
@@ -25,14 +31,22 @@ export function patch(node, container, runFx) {
 
   function createElement(node, parent) {
     var nextElement;
-    if (Array.isArray(node) && typeof node[0] === "string") {
-      nextElement = document.createElement(node[0]);
-      for (var i = 1; i < node.length; i++) {
-        var childElement = createElement(node[i], nextElement);
-        if (childElement) {
-          nextElement.appendChild(childElement);
+    if (Array.isArray(node)) {
+      var type = node[0];
+      var props = node[1] || {};
+      if (typeof type === "string") {
+        nextElement = document.createElement(type);
+        for (var i = 1; i < node.length; i++) {
+          var childElement = createElement(node[i], nextElement);
+          if (childElement) {
+            nextElement.appendChild(childElement);
+          }
         }
+      } else {
+        var resolvedNode = type(props, node[2]);
+        nextElement = createElement(resolvedNode, parent);
       }
+      runFx(props[lifecycleEvents[0]], nextElement);
     } else if (typeof node === "string" || typeof node === "number") {
       nextElement = document.createTextNode(node);
     } else {

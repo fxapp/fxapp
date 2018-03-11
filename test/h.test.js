@@ -54,25 +54,22 @@ test("pass through other falsy children", () => {
   expect(h("div", "")).toEqual(["div", ""]);
 });
 
-test("component with no props", () => {
-  const Component = ({ name = "world" }) => h("div", "Hello " + name);
-  expect(h(Component)).toEqual(["div", "Hello world"]);
-});
-
 const Component = h.bind(null, "div");
+
+test("component", () => expect(h(Component)).toEqual([Component]));
 
 test("component with props", () =>
   expect(h(Component, { id: "foo" }, "bar")).toEqual([
-    "div",
+    Component,
     { id: "foo" },
     "bar"
   ]));
 
 test("nested components with props", () => {
   expect(h(Component, { id: "foo" }, h(Component, { id: "bar" }))).toEqual([
-    "div",
+    Component,
     { id: "foo" },
-    ["div", { id: "bar" }]
+    [Component, { id: "bar" }]
   ]);
 });
 
