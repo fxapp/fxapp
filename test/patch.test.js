@@ -1,55 +1,45 @@
 import { patch } from "../src/patch";
 
-const noopRunFx = Function.prototype;
+const htmlTrim = html => html.replace(/\s{2,}/g, "");
 
-beforeEach(() => {
-  document.body.innerHTML = "";
-});
+const testPatch = (name, tests) => {
+  test(name, () => {
+    document.body.innerHTML = "";
+    tests.forEach(([vdom, html]) => {
+      patch(vdom, document.body, Function.prototype);
+      expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
+    });
+  });
+};
 
-test("empty div", () => {
-  patch(["div"], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe("<div></div>");
-});
+testPatch("empty div", [[["div"], "<div></div>"]]);
 
-test("span with text", () => {
-  patch(["span", "hello world"], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe("<span>hello world</span>");
-});
+testPatch("span with text", [
+  [["span", "hello world"], "<span>hello world</span>"]
+]);
 
-test("empty div with attributes", () => {
-  patch(["div", { id: "my-id", class: "my-class" }], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe(
+testPatch("empty div with attributes", [
+  [
+    ["div", { id: "my-id", class: "my-class" }],
     '<div id="my-id" class="my-class"></div>'
-  );
-});
+  ]
+]);
 
-test("div with child", () => {
-  patch(["div", ["div"]], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe("<div><div></div></div>");
-});
+testPatch("div with child", [[["div", ["div"]], "<div><div></div></div>"]]);
 
-test("div with styles", () => {
-  patch(
+testPatch("div with styles", [
+  [
     ["div", { style: { color: "red", fontSize: "1em", margin: null } }],
-    document.body,
-    noopRunFx
-  );
-  expect(document.body.innerHTML).toBe(
     '<div style="color: red; font-size: 1em;"></div>'
-  );
-});
+  ]
+]);
 
-test("empty string for null attributes", () => {
-  patch(["div", { id: null }], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe('<div id=""></div>');
-});
+testPatch("empty string for null attributes", [
+  [["div", { id: null }], '<div id=""></div>']
+]);
 
-test("custom attributes", () => {
-  patch(["div", { "data-test": "value" }], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe('<div data-test="value"></div>');
-});
+testPatch("custom attributes", [
+  [["div", { "data-test": "value" }], '<div data-test="value"></div>']
+]);
 
-test("null attributes", () => {
-  patch(["div", { disabled: null }], document.body, noopRunFx);
-  expect(document.body.innerHTML).toBe("<div></div>");
-});
+testPatch("null attributes", [[["div", { disabled: null }], "<div></div>"]]);
