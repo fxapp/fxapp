@@ -14,18 +14,18 @@ function resolvePathInNamespace(namespace, path) {
   return fullNamespace;
 }
 
-export function runIfFx(maybeFx, fxRunners, getAction) {
+export function runIfFx(maybeFx, currentEvent, fxRunners, getAction) {
   if (!isFx(maybeFx)) {
     // Not an effect
   } else if (isFx(maybeFx[0])) {
     // Run an array of effects
     for (var i in maybeFx) {
-      runIfFx(maybeFx[i], fxRunners, getAction);
+      runIfFx(maybeFx[i], currentEvent, fxRunners, getAction);
     }
   } else if (maybeFx.length) {
     // Run a single effect
     var fxType = maybeFx[0];
-    var fxProps = maybeFx[1];
+    var fxProps = assign(maybeFx[1], { event: currentEvent });
     var fxRunner = fxRunners[fxType];
     if (isFn(fxRunner)) {
       fxRunner(fxProps, getAction);
@@ -66,8 +66,18 @@ export function makeIntrinsicFx(namespace, store) {
         };
       },
       runner: function(fxProps, getAction) {
-        var requestedAction = getAction(fxProps.path);
-        requestedAction(fxProps.data);
+        getAction(fxProps.path)(fxProps.data);
+      }
+    },
+    {
+      name: "event",
+      creator: function(path) {
+        return {
+          path: path
+        };
+      },
+      runner: function(fxProps, getAction) {
+        getAction(fxProps.path)(fxProps.event);
       }
     }
   ];
@@ -101,8 +111,8 @@ export function makeFx(namespace, store, userFx) {
   var getAction = makeGetAction(namespace, store.actions);
   return {
     creators: fxCreators,
-    run: function(maybeFx) {
-      runIfFx(maybeFx, fxRunners, getAction);
+    run: function(maybeFx, currentEvent) {
+      runIfFx(maybeFx, currentEvent, fxRunners, getAction);
     }
   };
 }

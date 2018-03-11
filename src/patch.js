@@ -11,9 +11,8 @@ export function patch(node, container, runFx) {
       if (name in element) {
         if (isFx(value)) {
           // FIXME: only overwrite if fx changed
-          element[name] = function() {
-            // FIXME: provide event somehow
-            runFx(value);
+          element[name] = function(event) {
+            runFx(value, event);
           };
         } else {
           element[name] = value == null ? "" : value;
