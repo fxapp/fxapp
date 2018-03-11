@@ -1,18 +1,17 @@
-import { assign } from "./utils";
 import { isFx } from "./fxUtils";
 
 var lifecycleEvents = ["oncreate"];
 
 export function patch(node, container, runFx) {
-  function updateAttribute(element, name, value, oldValue) {
+  function updateAttribute(element, name, value) {
     if (name === "style") {
-      for (var i in assign(oldValue, value)) {
+      for (var i in value) {
         element[name][i] = value == null || value[i] == null ? "" : value[i];
       }
     } else {
       if (name in element) {
         if (isFx(value)) {
-          // FIXME: only overwrite if fx changed
+          // TODO: only overwrite if fx changed
           element[name] = function(event) {
             runFx(value, event);
           };
@@ -46,12 +45,13 @@ export function patch(node, container, runFx) {
         var resolvedNode = type(props, node[2]);
         nextElement = createElement(resolvedNode, parent);
       }
+      // oncreate
       runFx(props[lifecycleEvents[0]], nextElement);
     } else if (typeof node === "string" || typeof node === "number") {
       nextElement = document.createTextNode(node);
     } else {
       for (var name in node) {
-        updateAttribute(parent, name, node[name], null, false);
+        updateAttribute(parent, name, node[name]);
       }
     }
 
