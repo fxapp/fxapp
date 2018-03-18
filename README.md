@@ -18,14 +18,7 @@ fx.app({
   view: ({ state, fx }) => [
     "main",
     ["h1", state.count],
-    [
-      "button",
-      {
-        onclick: fx.action("down"),
-        disabled: state.count <= 0
-      },
-      "-"
-    ],
+    ["button", { onclick: fx.action("down") }, "-"],
     ["button", { onclick: fx.action("up") }, "+"]
   ]
 });
