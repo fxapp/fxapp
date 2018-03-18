@@ -2,6 +2,10 @@ export function isFn(value) {
   return typeof value === "function";
 }
 
+export function isObj(value) {
+  return typeof value === "object" && !Array.isArray(value);
+}
+
 export function assign(from, assignments) {
   var i,
     obj = {};

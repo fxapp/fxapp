@@ -2,15 +2,21 @@ import { patch } from "../src/patch";
 
 const htmlTrim = html => html.replace(/\s{2,}/g, "");
 
-const testPatch = (name, tests) => {
-  test(name, () => {
-    document.body.innerHTML = "";
-    tests.forEach(([vdom, html]) => {
-      patch(vdom, document.body, Function.prototype);
-      expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
+const testPatch = (name, tests, skip) => {
+  if (skip) {
+    test.skip(name);
+  } else {
+    test(name, () => {
+      document.body.innerHTML = "";
+      tests.forEach(([vdom, html]) => {
+        patch(vdom, document.body, Function.prototype);
+        expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
+      });
     });
-  });
+  }
 };
+
+testPatch("noop", [], "");
 
 testPatch("empty div", [[["div"], "<div></div>"]]);
 
@@ -26,6 +32,10 @@ testPatch("empty div with attributes", [
 ]);
 
 testPatch("div with child", [[["div", ["div"]], "<div><div></div></div>"]]);
+
+testPatch("boolean/falsy children", [
+  [["div", undefined, null, true, false, "", 0], "<div>0</div>"]
+]);
 
 testPatch("styles", [
   [["div"], "<div></div>"],
@@ -73,10 +83,10 @@ testPatch("replace child", [
   [
     ["main", ["div", "foo"]],
     `
-      <main>
-        <div>foo</div>
-      </main>
-    `
+        <main>
+          <div>foo</div>
+        </main>
+      `
   ],
   [
     ["main", ["div", "bar"]],
@@ -92,19 +102,19 @@ testPatch("insert child at top", [
   [
     ["main", ["div", "A"]],
     `
-      <main>
-        <div>A</div>
-      </main>
-    `
+        <main>
+          <div>A</div>
+        </main>
+      `
   ],
   [
     ["main", ["div", "B"], ["div", "A"]],
     `
-      <main>
-        <div>B</div>
-        <div>A</div>
-      </main>
-    `
+        <main>
+          <div>B</div>
+          <div>A</div>
+        </main>
+      `
   ],
   [
     ["main", ["div", "C"], ["div", "B"], ["div", "A"]],
@@ -118,35 +128,43 @@ testPatch("insert child at top", [
   ]
 ]);
 
-testPatch("remove text node", [
+testPatch(
+  "remove text node",
   [
-    ["main", ["div", "foo"], "bar"],
-    `
-      <main>
-        <div>foo</div>
-        bar
-      </main>
-    `
+    [
+      ["main", ["div", "foo"], "bar"],
+      `
+        <main>
+          <div>foo</div>
+          bar
+        </main>
+      `
+    ],
+    [
+      ["main", ["div", "foo"]],
+      `
+        <main>
+          <div>foo</div>
+        </main>
+      `
+    ]
   ],
-  [
-    ["main", ["div", "foo"]],
-    `
-      <main>
-        <div>foo</div>
-      </main>
-    `
-  ]
-]);
+  true
+);
 
 testPatch("update element data", [
   [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
   [["div", { id: "foo", class: "baz" }], '<div id="foo" class="baz"></div>']
 ]);
 
-testPatch("remove attributes", [
-  [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
-  [["div"], "<div></div>"]
-]);
+testPatch(
+  "remove attributes",
+  [
+    [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
+    [["div"], "<div></div>"]
+  ],
+  true
+);
 
 testPatch("a list with empty text nodes", [
   [
@@ -260,17 +278,19 @@ testPatch("reorder children", [
   ]
 ]);
 
-testPatch("grow/shrink", [
+testPatch(
+  "grow/shrink",
   [
     [
-      "main",
-      ["div", "A"],
-      ["div", "B"],
-      ["div", "C"],
-      ["div", "D"],
-      ["div", "E"]
-    ],
-    `
+      [
+        "main",
+        ["div", "A"],
+        ["div", "B"],
+        ["div", "C"],
+        ["div", "D"],
+        ["div", "E"]
+      ],
+      `
       <main>
         <div>A</div>
         <div>B</div>
@@ -279,35 +299,35 @@ testPatch("grow/shrink", [
         <div>E</div>
       </main>
     `
-  ],
-  [
-    ["main", ["div", "A"], ["div", "C"], ["div", "D"]],
-    `
+    ],
+    [
+      ["main", ["div", "A"], ["div", "C"], ["div", "D"]],
+      `
       <main>
         <div>A</div>
         <div>C</div>
         <div>D</div>
       </main>
     `
-  ],
-  [
-    ["main", ["div", "D"]],
-    `
+    ],
+    [
+      ["main", ["div", "D"]],
+      `
       <main>
         <div>D</div>
       </main>
     `
-  ],
-  [
-    [
-      "main",
-      ["div", "A"],
-      ["div", "B"],
-      ["div", "C"],
-      ["div", "D"],
-      ["div", "E"]
     ],
-    `
+    [
+      [
+        "main",
+        ["div", "A"],
+        ["div", "B"],
+        ["div", "C"],
+        ["div", "D"],
+        ["div", "E"]
+      ],
+      `
       <main>
         <div>A</div>
         <div>B</div>
@@ -316,10 +336,10 @@ testPatch("grow/shrink", [
         <div>E</div>
       </main>
     `
-  ],
-  [
-    ["main", ["div", "D"], ["div", "C"], ["div", "B"], ["div", "A"]],
-    `
+    ],
+    [
+      ["main", ["div", "D"], ["div", "C"], ["div", "B"], ["div", "A"]],
+      `
       <main>
         <div>D</div>
         <div>C</div>
@@ -327,5 +347,7 @@ testPatch("grow/shrink", [
         <div>A</div>
       </main>
     `
-  ]
-]);
+    ]
+  ],
+  true
+);
