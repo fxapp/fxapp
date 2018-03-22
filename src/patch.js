@@ -62,7 +62,7 @@ export function patch(rootNode, container, runFx) {
       }
       var lastVnode = element.vnode || [];
       var lastProps = isObj(lastVnode[1]) ? lastVnode[1] : {};
-      var existingChildren = element ? element.childNodes : [];
+      var existingChildren = element.childNodes;
       var i;
       if (Array.isArray(node)) {
         var type = node[0];
@@ -94,7 +94,7 @@ export function patch(rootNode, container, runFx) {
           while (existingChildren.length > childCount && !newElement) {
             element.removeChild(existingChildren[childCount]);
           }
-        } else if (Array.isArray(type)) {
+        } else {
           for (i = 0; i < node.length; i++) {
             patchElement(element, existingChildren[i], node[i]);
           }
