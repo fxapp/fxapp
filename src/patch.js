@@ -27,6 +27,10 @@ export function patch(rootNode, container, runFx) {
       ) {
         element.setAttribute(name, value);
       }
+
+      if (value == null || value === false) {
+        element.removeAttribute(name);
+      }
     }
   }
 
@@ -46,13 +50,15 @@ export function patch(rootNode, container, runFx) {
 
   function patchElement(parent, element, node, propsNode) {
     propsNode = propsNode || node;
+    var newElement;
     if (Array.isArray(node) && isFn(node[0])) {
-      var resolvedNode = node[0](node[1], node[2]);
+      var resolvedNode = node[0](node[1]);
       element = patchElement(parent, element, resolvedNode, node);
     } else {
       if (!element) {
-        element = createElement(node, propsNode);
-        parent.appendChild(element);
+        newElement = createElement(node, propsNode);
+        parent.appendChild(newElement);
+        element = newElement;
       }
       var lastVnode = element.vnode || [];
       var lastProps = isObj(lastVnode[1]) ? lastVnode[1] : {};
@@ -62,21 +68,31 @@ export function patch(rootNode, container, runFx) {
         var type = node[0];
         if (typeof type === "string") {
           if (type !== lastVnode[0]) {
-            var newElement = createElement(node, propsNode);
+            newElement = createElement(node, propsNode);
             parent.insertBefore(newElement, element);
             parent.removeChild(element);
             element = newElement;
           }
 
+          var newProps = isObj(node[1]) ? node[1] : {};
+          for (i in assign(lastProps, newProps)) {
+            updateAttribute(element, i, newProps[i], lastProps[i]);
+          }
+          var childCount = 0;
           for (i = 1; i < node.length; i++) {
             var child = node[i];
-            if (isObj(child)) {
-              for (var j in child) {
-                updateAttribute(element, j, child[j], lastProps[j]);
-              }
-            } else if (child != null && child !== true && child !== false) {
+            if (
+              !isObj(child) &&
+              child != null &&
+              child !== true &&
+              child !== false
+            ) {
+              childCount++;
               patchElement(element, existingChildren[i - 1], child);
             }
+          }
+          while (existingChildren.length > childCount && !newElement) {
+            element.removeChild(existingChildren[childCount]);
           }
         } else if (Array.isArray(type)) {
           for (i = 0; i < node.length; i++) {

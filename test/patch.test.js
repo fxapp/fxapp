@@ -2,18 +2,14 @@ import { patch } from "../src/patch";
 
 const htmlTrim = html => html.replace(/\s{2,}/g, "");
 
-const testPatch = (name, tests, skip) => {
-  if (skip) {
-    test.skip(name);
-  } else {
-    test(name, () => {
-      document.body.innerHTML = "";
-      tests.forEach(([vdom, html]) => {
-        patch(vdom, document.body, Function.prototype);
-        expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
-      });
+const testPatch = (name, tests) => {
+  test(name, () => {
+    document.body.innerHTML = "";
+    tests.forEach(([vdom, html]) => {
+      patch(vdom, document.body, Function.prototype);
+      expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
     });
-  }
+  });
 };
 
 testPatch("noop", [], "");
@@ -58,10 +54,6 @@ testPatch("true attributes", [
   [["div", { enabled: true }], '<div enabled="true"></div>']
 ]);
 
-testPatch("empty string for null attributes", [
-  [["div", { id: null }], '<div id=""></div>']
-]);
-
 testPatch("custom attributes", [
   [["div", { "data-test": "value" }], '<div data-test="value"></div>']
 ]);
@@ -83,10 +75,10 @@ testPatch("replace child", [
   [
     ["main", ["div", "foo"]],
     `
-        <main>
-          <div>foo</div>
-        </main>
-      `
+      <main>
+        <div>foo</div>
+      </main>
+    `
   ],
   [
     ["main", ["div", "bar"]],
@@ -102,19 +94,19 @@ testPatch("insert child at top", [
   [
     ["main", ["div", "A"]],
     `
-        <main>
-          <div>A</div>
-        </main>
-      `
+      <main>
+        <div>A</div>
+      </main>
+    `
   ],
   [
     ["main", ["div", "B"], ["div", "A"]],
     `
-        <main>
-          <div>B</div>
-          <div>A</div>
-        </main>
-      `
+      <main>
+        <div>B</div>
+        <div>A</div>
+      </main>
+    `
   ],
   [
     ["main", ["div", "C"], ["div", "B"], ["div", "A"]],
@@ -128,43 +120,35 @@ testPatch("insert child at top", [
   ]
 ]);
 
-testPatch(
-  "remove text node",
+testPatch("remove text node", [
   [
-    [
-      ["main", ["div", "foo"], "bar"],
-      `
-        <main>
-          <div>foo</div>
-          bar
-        </main>
-      `
-    ],
-    [
-      ["main", ["div", "foo"]],
-      `
-        <main>
-          <div>foo</div>
-        </main>
-      `
-    ]
+    ["main", ["div", "foo"], "bar"],
+    `
+      <main>
+        <div>foo</div>
+        bar
+      </main>
+    `
   ],
-  true
-);
+  [
+    ["main", ["div", "foo"]],
+    `
+      <main>
+        <div>foo</div>
+      </main>
+    `
+  ]
+]);
 
 testPatch("update element data", [
   [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
   [["div", { id: "foo", class: "baz" }], '<div id="foo" class="baz"></div>']
 ]);
 
-testPatch(
-  "remove attributes",
-  [
-    [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
-    [["div"], "<div></div>"]
-  ],
-  true
-);
+testPatch("remove attributes", [
+  [["div", { id: "foo", class: "bar" }], '<div id="foo" class="bar"></div>'],
+  [["div"], "<div></div>"]
+]);
 
 testPatch("a list with empty text nodes", [
   [
@@ -278,19 +262,17 @@ testPatch("reorder children", [
   ]
 ]);
 
-testPatch(
-  "grow/shrink",
+testPatch("grow/shrink", [
   [
     [
-      [
-        "main",
-        ["div", "A"],
-        ["div", "B"],
-        ["div", "C"],
-        ["div", "D"],
-        ["div", "E"]
-      ],
-      `
+      "main",
+      ["div", "A"],
+      ["div", "B"],
+      ["div", "C"],
+      ["div", "D"],
+      ["div", "E"]
+    ],
+    `
       <main>
         <div>A</div>
         <div>B</div>
@@ -299,55 +281,53 @@ testPatch(
         <div>E</div>
       </main>
     `
-    ],
-    [
-      ["main", ["div", "A"], ["div", "C"], ["div", "D"]],
-      `
-      <main>
-        <div>A</div>
-        <div>C</div>
-        <div>D</div>
-      </main>
-    `
-    ],
-    [
-      ["main", ["div", "D"]],
-      `
-      <main>
-        <div>D</div>
-      </main>
-    `
-    ],
-    [
-      [
-        "main",
-        ["div", "A"],
-        ["div", "B"],
-        ["div", "C"],
-        ["div", "D"],
-        ["div", "E"]
-      ],
-      `
-      <main>
-        <div>A</div>
-        <div>B</div>
-        <div>C</div>
-        <div>D</div>
-        <div>E</div>
-      </main>
-    `
-    ],
-    [
-      ["main", ["div", "D"], ["div", "C"], ["div", "B"], ["div", "A"]],
-      `
-      <main>
-        <div>D</div>
-        <div>C</div>
-        <div>B</div>
-        <div>A</div>
-      </main>
-    `
-    ]
   ],
-  true
-);
+  [
+    ["main", ["div", "A"], ["div", "C"], ["div", "D"]],
+    `
+      <main>
+        <div>A</div>
+        <div>C</div>
+        <div>D</div>
+      </main>
+    `
+  ],
+  [
+    ["main", ["div", "D"]],
+    `
+      <main>
+        <div>D</div>
+      </main>
+    `
+  ],
+  [
+    [
+      "main",
+      ["div", "A"],
+      ["div", "B"],
+      ["div", "C"],
+      ["div", "D"],
+      ["div", "E"]
+    ],
+    `
+      <main>
+        <div>A</div>
+        <div>B</div>
+        <div>C</div>
+        <div>D</div>
+        <div>E</div>
+      </main>
+    `
+  ],
+  [
+    ["main", ["div", "D"], ["div", "C"], ["div", "B"], ["div", "A"]],
+    `
+      <main>
+        <div>D</div>
+        <div>C</div>
+        <div>B</div>
+        <div>A</div>
+      </main>
+    `
+  ]
+]);
