@@ -331,3 +331,10 @@ testPatch("grow/shrink", [
     `
   ]
 ]);
+
+testPatch("multiple root nodes", [
+  [
+    [["div", "A"], ["div", "B"], ["div", "C"]],
+    "<div>A</div><div>B</div><div>C</div>"
+  ]
+]);

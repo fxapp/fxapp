@@ -108,6 +108,13 @@ export function patch(rootNode, container, runFx) {
     return element;
   }
 
-  patchElement(container.parentNode, container, [rootNode]);
+  patchElement(
+    container.parentNode,
+    container,
+    Array.isArray(rootNode) &&
+    (typeof rootNode[0] === "string" || isFn(rootNode[0]))
+      ? [rootNode]
+      : rootNode
+  );
   while (stack.length) stack.pop()();
 }
