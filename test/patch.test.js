@@ -1,12 +1,13 @@
 import { patch } from "../src/patch";
 
 const htmlTrim = html => html.replace(/\s{2,}/g, "");
+const stubFx = { run: Function.prototype };
 
 const testPatch = (name, tests) => {
   test(name, () => {
     document.body.innerHTML = "";
     tests.forEach(([vdom, html]) => {
-      patch(vdom, document.body, Function.prototype);
+      patch(vdom, document.body, stubFx);
       expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
     });
   });

@@ -40,7 +40,7 @@ export function app(props) {
       state: store.state,
       fx: rootFx.creators
     });
-    patch(nextNode, container, rootFx.run);
+    patch(nextNode, container, rootFx);
   }
 
   if (isFn(props.view)) {

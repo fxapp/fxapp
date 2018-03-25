@@ -3,7 +3,7 @@ import { isFx } from "./fxUtils";
 
 var lifecycleEventNames = ["oncreate"];
 
-export function patch(rootNode, container, runFx) {
+export function patch(rootNode, container, fx) {
   var stack = [];
   function updateAttribute(element, name, value, oldValue) {
     if (name === "style" && isObj(value)) {
@@ -15,7 +15,7 @@ export function patch(rootNode, container, runFx) {
         if (isFx(value)) {
           // TODO: only overwrite if fx changed
           element[name] = function(event) {
-            runFx(value, event);
+            fx.run(value, event);
           };
         } else {
           element[name] = value == null ? "" : value;
@@ -42,7 +42,7 @@ export function patch(rootNode, container, runFx) {
     element.vnode = node;
     stack.push(function() {
       // oncreate
-      runFx((propsNode[1] || {})[lifecycleEventNames[0]], element);
+      fx.run((propsNode[1] || {})[lifecycleEventNames[0]], element);
     });
 
     return element;
@@ -52,8 +52,8 @@ export function patch(rootNode, container, runFx) {
     propsNode = propsNode || node;
     var newElement;
     if (Array.isArray(node) && isFn(node[0])) {
-      var resolvedNode = node[0](node[1]);
-      element = patchElement(parent, element, resolvedNode, node);
+      node = node[0](assign(node[1], { fx: fx.creators }));
+      element = patchElement(parent, element, node, node);
     } else {
       if (!element) {
         newElement = createElement(node, propsNode);

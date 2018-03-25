@@ -22,7 +22,11 @@ test("oncreate lifecycle event", done =>
   }));
 
 test("components with lifecycle events", done => {
-  const Component = ({ message }) => ["div", message];
+  const Component = ({ message, fx }) => [
+    "div",
+    { oncreate: fx.event("foo") },
+    message
+  ];
   app({
     actions: {
       foo({ data }) {
@@ -30,11 +34,10 @@ test("components with lifecycle events", done => {
         done();
       }
     },
-    view: ({ fx }) => [
+    view: () => [
       Component,
       {
-        message: "hello world",
-        oncreate: fx.event("foo")
+        message: "hello world"
       }
     ]
   });
