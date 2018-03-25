@@ -6,18 +6,19 @@ beforeEach(() => {
 
 test("oncreate lifecycle event", done =>
   app({
+    state: { message: "hello" },
     actions: {
       foo({ data }) {
         expect(data.outerHTML).toBe("<div>hello</div>");
         done();
       }
     },
-    view: ({ fx }) => [
+    view: ({ state, fx }) => [
       "div",
       {
         oncreate: fx.event("foo")
       },
-      "hello"
+      state.message
     ]
   }));
 
