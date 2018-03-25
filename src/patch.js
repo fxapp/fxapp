@@ -34,7 +34,7 @@ export function patch(rootNode, container, fx) {
     }
   }
 
-  function createElement(node, propsNode) {
+  function createElement(node) {
     var element =
       typeof node === "string" || typeof node === "number"
         ? document.createTextNode(node)
@@ -42,21 +42,20 @@ export function patch(rootNode, container, fx) {
     element.vnode = node;
     stack.push(function() {
       // oncreate
-      fx.run((propsNode[1] || {})[lifecycleEventNames[0]], element);
+      fx.run((node[1] || {})[lifecycleEventNames[0]], element);
     });
 
     return element;
   }
 
-  function patchElement(parent, element, node, propsNode) {
-    propsNode = propsNode || node;
+  function patchElement(parent, element, node) {
     var newElement;
     if (Array.isArray(node) && isFn(node[0])) {
       node = node[0](assign(node[1], { fx: fx.creators, state: fx.state }));
       element = patchElement(parent, element, node, node);
     } else {
       if (!element) {
-        newElement = createElement(node, propsNode);
+        newElement = createElement(node);
         parent.appendChild(newElement);
         element = newElement;
       }
@@ -68,7 +67,7 @@ export function patch(rootNode, container, fx) {
         var type = node[0];
         if (typeof type === "string") {
           if (type !== lastVnode[0]) {
-            newElement = createElement(node, propsNode);
+            newElement = createElement(node);
             parent.insertBefore(newElement, element);
             parent.removeChild(element);
             element = newElement;
