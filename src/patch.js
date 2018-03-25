@@ -1,5 +1,4 @@
-import { isObj, isFn, assign } from "./utils.js";
-import { isFx } from "./fxUtils";
+import { isArray, isObj, isFn, assign } from "./utils.js";
 
 var lifecycleEventNames = ["oncreate"];
 
@@ -12,7 +11,7 @@ export function patch(rootNode, container, fx) {
       }
     } else {
       if (name in element) {
-        if (isFx(value)) {
+        if (isArray(value)) {
           // TODO: only overwrite if fx changed
           element[name] = function(event) {
             fx.run(value, event);
@@ -51,7 +50,7 @@ export function patch(rootNode, container, fx) {
 
   function patchElement(parent, element, node) {
     var newElement;
-    if (Array.isArray(node) && isFn(node[0])) {
+    if (isArray(node) && isFn(node[0])) {
       node = node[0](assign(node[1], { fx: fx.creators, state: fx.state }));
       element = patchElement(parent, element, node, node);
     } else {
@@ -64,7 +63,7 @@ export function patch(rootNode, container, fx) {
       var lastProps = isObj(lastVnode[1]) ? lastVnode[1] : {};
       var existingChildren = element.childNodes;
       var i;
-      if (Array.isArray(node)) {
+      if (isArray(node)) {
         var type = node[0];
         if (typeof type === "string") {
           if (type !== lastVnode[0]) {
@@ -111,8 +110,7 @@ export function patch(rootNode, container, fx) {
   patchElement(
     container.parentNode,
     container,
-    Array.isArray(rootNode) &&
-    (typeof rootNode[0] === "string" || isFn(rootNode[0]))
+    isArray(rootNode) && (typeof rootNode[0] === "string" || isFn(rootNode[0]))
       ? [rootNode]
       : rootNode
   );

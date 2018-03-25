@@ -1,6 +1,4 @@
-import { isFn, assign, set, get, reduceByNameAndProp } from "./utils";
-
-export var isFx = Array.isArray;
+import { isArray, isFn, assign, set, get, reduceByNameAndProp } from "./utils";
 
 function resolvePathInNamespace(namespace, path) {
   path = path || "";
@@ -15,9 +13,9 @@ function resolvePathInNamespace(namespace, path) {
 }
 
 export function runIfFx(maybeFx, currentEvent, fxRunners, getAction) {
-  if (!isFx(maybeFx)) {
+  if (!isArray(maybeFx)) {
     // Not an effect
-  } else if (isFx(maybeFx[0])) {
+  } else if (isArray(maybeFx[0])) {
     // Run an array of effects
     for (var i in maybeFx) {
       runIfFx(maybeFx[i], currentEvent, fxRunners, getAction);
