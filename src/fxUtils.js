@@ -110,6 +110,7 @@ export function makeFx(namespace, store, userFx) {
   var fxRunners = reduceByNameAndProp(allFx, "runner");
   var getAction = makeGetAction(namespace, store.actions);
   return {
+    state: store.state,
     creators: fxCreators,
     run: function(maybeFx, currentEvent) {
       runIfFx(maybeFx, currentEvent, fxRunners, getAction);

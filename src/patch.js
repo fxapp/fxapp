@@ -52,7 +52,7 @@ export function patch(rootNode, container, fx) {
     propsNode = propsNode || node;
     var newElement;
     if (Array.isArray(node) && isFn(node[0])) {
-      node = node[0](assign(node[1], { fx: fx.creators }));
+      node = node[0](assign(node[1], { fx: fx.creators, state: fx.state }));
       element = patchElement(parent, element, node, node);
     } else {
       if (!element) {

@@ -23,12 +23,13 @@ test("oncreate lifecycle event", done =>
   }));
 
 test("components with lifecycle events", done => {
-  const Component = ({ message, fx }) => [
+  const Component = ({ name, state, fx }) => [
     "div",
     { oncreate: fx.event("foo") },
-    message
+    `${state.message} ${name}`
   ];
   app({
+    state: { message: "hello" },
     actions: {
       foo({ data }) {
         expect(data.outerHTML).toBe("<div>hello world</div>");
@@ -38,7 +39,7 @@ test("components with lifecycle events", done => {
     view: () => [
       Component,
       {
-        message: "hello world"
+        name: "world"
       }
     ]
   });
