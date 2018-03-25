@@ -40,9 +40,10 @@ export function patch(rootNode, container, fx) {
         ? document.createTextNode(node)
         : document.createElement(node[0]);
     element.vnode = node;
+    var props = node[1] || {};
     stack.push(function() {
       // oncreate
-      fx.run((node[1] || {})[lifecycleEventNames[0]], element);
+      fx.run(props[lifecycleEventNames[0]], { props: props, element: element });
     });
 
     return element;

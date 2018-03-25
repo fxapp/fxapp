@@ -77,7 +77,7 @@ export function makeIntrinsicFx(namespace, store) {
         };
       },
       runner: function(fxProps, getAction) {
-        getAction(fxProps.path)(fxProps.event);
+        getAction(fxProps.path)(fxProps.event.props || fxProps.event);
       }
     }
   ];
@@ -96,7 +96,7 @@ export function makeGetAction(namespace, actions) {
 
 function makeFxCreator(name, fxCreator) {
   return function() {
-    return [name, fxCreator.apply(null, arguments)];
+    return [name, isFn(fxCreator) ? fxCreator.apply(null, arguments) : {}];
   };
 }
 
