@@ -1,5 +1,11 @@
+export var isArray = Array.isArray;
+
 export function isFn(value) {
   return typeof value === "function";
+}
+
+export function isObj(value) {
+  return typeof value === "object" && !isArray(value);
 }
 
 export function assign(from, assignments) {

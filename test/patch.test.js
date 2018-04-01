@@ -1,16 +1,19 @@
 import { patch } from "../src/patch";
 
 const htmlTrim = html => html.replace(/\s{2,}/g, "");
+const stubFx = { run: Function.prototype };
 
 const testPatch = (name, tests) => {
   test(name, () => {
     document.body.innerHTML = "";
     tests.forEach(([vdom, html]) => {
-      patch(vdom, document.body, Function.prototype);
+      patch(vdom, document.body, stubFx);
       expect(htmlTrim(document.body.innerHTML)).toBe(htmlTrim(html));
     });
   });
 };
+
+testPatch("noop", [], "");
 
 testPatch("empty div", [[["div"], "<div></div>"]]);
 
@@ -26,6 +29,10 @@ testPatch("empty div with attributes", [
 ]);
 
 testPatch("div with child", [[["div", ["div"]], "<div><div></div></div>"]]);
+
+testPatch("boolean/falsy children", [
+  [["div", undefined, null, true, false, "", 0], "<div>0</div>"]
+]);
 
 testPatch("styles", [
   [["div"], "<div></div>"],
@@ -46,10 +53,6 @@ testPatch("styles", [
 
 testPatch("true attributes", [
   [["div", { enabled: true }], '<div enabled="true"></div>']
-]);
-
-testPatch("empty string for null attributes", [
-  [["div", { id: null }], '<div id=""></div>']
 ]);
 
 testPatch("custom attributes", [
@@ -327,5 +330,12 @@ testPatch("grow/shrink", [
         <div>A</div>
       </main>
     `
+  ]
+]);
+
+testPatch("multiple root nodes", [
+  [
+    [["div", "A"], ["div", "B"], ["div", "C"]],
+    "<div>A</div><div>B</div><div>C</div>"
   ]
 ]);
