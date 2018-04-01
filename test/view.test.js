@@ -55,7 +55,7 @@ test("custom oncreate lifecycle event", done =>
   }));
 
 test("components with lifecycle events", done => {
-  const Component = ({ name, state, fx }) => [
+  const Component = ({ props: { name }, state, fx }) => [
     "div",
     { oncreate: fx.event("foo") },
     `${state.message} ${name}`
@@ -67,6 +67,7 @@ test("components with lifecycle events", done => {
         expect(data).toEqual({
           oncreate: fx.event("foo")
         });
+        expect(document.body.innerHTML).toBe("<div>hello world</div>");
         done();
       }
     },
@@ -80,7 +81,7 @@ test("components with lifecycle events", done => {
 });
 
 test("components with custom lifecycle events", done => {
-  const Component = ({ name, state, fx }) => [
+  const Component = ({ props: { name }, state, fx }) => [
     "div",
     { oncreate: fx.create() },
     `${state.message} ${name}`

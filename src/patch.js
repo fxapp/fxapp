@@ -42,7 +42,10 @@ export function patch(rootNode, container, fx) {
     var props = node[1] || {};
     stack.push(function() {
       // oncreate
-      fx.run(props[lifecycleEventNames[0]], { props: props, element: element });
+      fx.run(props[lifecycleEventNames[0]], {
+        props: props,
+        element: element
+      });
     });
 
     return element;
@@ -51,7 +54,11 @@ export function patch(rootNode, container, fx) {
   function patchElement(parent, element, node) {
     var newElement;
     if (isArray(node) && isFn(node[0])) {
-      node = node[0](assign(node[1], { fx: fx.creators, state: fx.state }));
+      node = node[0]({
+        props: node[1],
+        fx: fx.creators,
+        state: fx.state
+      });
       element = patchElement(parent, element, node, node);
     } else {
       if (!element) {
