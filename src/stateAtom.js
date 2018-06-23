@@ -1,13 +1,7 @@
 const { isFn } = require("./utils");
 
-const makeStateAtom = (currentState = {}) =>
-  function atom(action) {
-    if (isFn(action)) {
-      currentState = action(currentState);
-      return currentState;
-    }
-    return action;
-  };
+const makeStateAtom = (currentState = {}) => action =>
+  isFn(action) ? (currentState = action(currentState)) : action;
 
 const getState = state => state;
 
