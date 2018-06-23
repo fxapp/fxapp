@@ -1,9 +1,7 @@
 {
   "name": "fxapp",
   "description": "Build JavaScript apps using effects as data",
-  "version": "0.3.0",
-  "main": "dist/fxapp.js",
-  "module": "src/index.js",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fxapp/fxapp.git"
@@ -14,28 +12,21 @@
   ],
   "keywords": [
     "effects",
-    "data",
-    "vdom"
+    "data"
   ],
   "devDependencies": {
-    "babel-preset-env": "=1.6.1",
+    "babel-preset-env": "=1.7.0",
     "eslint": "=4.19.1",
-    "eslint-plugin-compat": "=2.2.0",
-    "jest": "=22.4.3",
-    "rollup": "=0.57.1",
-    "uglify-js": "=3.3.16"
+    "jest": "=23.1.0"
   },
   "scripts": {
     "clean": "npx rimraf coverage dist node_modules",
     "format": "npx prettier --write {src,test}/**/*.js",
     "format:check": "npx prettier --list-different {src,test}/**/*.js",
     "lint": "eslint {src,test}/**/*.js",
-    "test": "jest --coverage --no-cache",
-    "bundle": "rollup -i src/index.js -o dist/fxapp.js -m -f umd -n fx",
-    "minify": "uglifyjs dist/fxapp.js -o dist/fxapp.js -mc --source-map includeSources,url=fxapp.js.map",
+    "test": "jest --coverage",
     "check": "npm run format:check && npm run lint && npm t",
-    "build": "npm run check && npm run bundle && npm run minify",
-    "prepare": "npm run build",
+    "prepare": "npm run check",
     "release": "./pre-flight-tests && npm run clean && git pull && npm i && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "babel": {
@@ -43,23 +34,14 @@
   },
   "eslintConfig": {
     "extends": "eslint:recommended",
-    "plugins": [
-      "compat"
-    ],
-    "parserOptions": {
-      "sourceType": "module"
-    },
     "env": {
-      "browser": true
+      "node": true,
+      "es6": true
     },
     "rules": {
-      "no-use-before-define": "error",
-      "compat/compat": "error"
+      "no-use-before-define": "error"
     }
   },
-  "browserslist": [
-    "IE 10"
-  ],
   "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
   "license": "MIT",
   "bugs": {
