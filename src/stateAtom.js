@@ -1,6 +1,6 @@
 const { isFn } = require("./utils");
 
-const makeStateAtom = (initialState = {}, currentState = initialState) =>
+const makeStateAtom = (currentState = {}) =>
   function atom(action) {
     if (isFn(action)) {
       currentState = action(currentState);
