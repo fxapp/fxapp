@@ -1,8 +1,9 @@
 const { isFn, isObj, assign } = require("./utils");
 
-const mergeMiddleware = (action, result) => [
+const mergeMiddleware = (action, inputs, outputs) => [
   action,
-  isObj(action) ? assign([result, action]) : result,
+  inputs,
+  outputs,
   isFn(action) &&
     ((latestState, actionResult = action(latestState)) =>
       isObj(actionResult) ? assign([latestState, actionResult]) : actionResult)

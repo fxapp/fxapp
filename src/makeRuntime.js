@@ -7,24 +7,25 @@ const makeRuntime = (middleware = []) => {
     if (isArray(action)) {
       return action.map(runtime);
     }
-    const [lastAction, lastResult, lastState] = middleware.reduce(
-      ([prevAction, prevResult], nextMiddleware) => {
+    const [lastAction, lastInputs, lastOutputs, lastState] = middleware.reduce(
+      ([prevAction, prevInputs, prevOutputs], nextMiddleware) => {
         const currentState = atom(getState);
-        const [nextAction, nextResult, updater] = nextMiddleware(
+        const [nextAction, nextInputs, nextOutputs, updater] = nextMiddleware(
           prevAction,
-          prevResult,
+          prevInputs,
+          prevOutputs,
           currentState
         );
         atom(updater);
         const nextState = atom(getState);
-        return [nextAction, nextResult, nextState];
+        return [nextAction, nextInputs, nextOutputs, nextState];
       },
       [action]
     );
     if (isObj(lastAction) && isFn(lastAction.effect)) {
-      lastAction.effect(lastState, runtime);
+      lastAction.effect(lastState, lastAction, runtime);
     }
-    return [lastAction, lastResult, lastState];
+    return [lastAction, lastInputs, lastOutputs, lastState];
   };
 
   return runtime;

@@ -1,8 +1,9 @@
 const { isFn } = require("../src/utils");
 
-const updateMiddleware = (action, result) => [
+const updateMiddleware = (action, inputs, outputs) => [
   action,
-  result,
+  inputs,
+  outputs,
   isFn(action) && action
 ];
 
