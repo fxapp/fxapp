@@ -1,14 +1,17 @@
 const makeServer = require("../src/makeServer");
 
 describe("makeServer", () => {
+  const serverRuntime = Function.prototype;
   it("should be a function", () => expect(makeServer).toBeInstanceOf(Function));
   it("should return a promise that resolves when the server is listening", () =>
     makeServer({
       port: 8080,
+      serverRuntime,
       httpApi: {
-        createServer: () => ({
+        createServer: requestListener => ({
           listen: (props, resolve) => ({
             on: () => {
+              expect(requestListener).toBe(serverRuntime);
               expect(props).toEqual({
                 port: 8080
               });
@@ -24,10 +27,11 @@ describe("makeServer", () => {
       httpApi: {
         createServer: () => ({
           listen: props => ({
-            on: (_, reject) => {
+            on: (eventName, reject) => {
               expect(props).toEqual({
                 port: 8080
               });
+              expect(eventName).toBe("error");
               reject("port busy");
             }
           })

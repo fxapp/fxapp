@@ -1,9 +1,4 @@
-const makeServerRuntime = require("./makeServerRuntime");
-
-const makeServer = (
-  { httpApi, port, init, routerMiddleware },
-  serverRuntime = makeServerRuntime({ init, routerMiddleware })
-) =>
+const makeServer = ({ httpApi, port, serverRuntime }) =>
   new Promise((resolve, reject) =>
     httpApi
       .createServer(serverRuntime)
