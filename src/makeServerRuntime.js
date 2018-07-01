@@ -1,27 +1,22 @@
 const makeRuntimeFactory = require("./makeRuntimeFactory");
-const makeApplyMiddleware = require("./makeApplyMiddleware");
+const applyMiddleware = require("./applyMiddleware");
 const requestContextMiddleware = require("./middleware/requestContextMiddleware");
 const requestUrlMiddleware = require("./middleware/requestUrlMiddleware");
 const sendResponseMiddleware = require("./middleware/sendResponseMiddleware");
 
 const makeServerRuntime = ({
   init,
-  requestMiddleware = [],
+  requestMiddleware = [requestContextMiddleware, requestUrlMiddleware],
   routerMiddleware = [],
-  responseMiddleware = []
+  responseMiddleware = [sendResponseMiddleware]
 }) => {
   const runtimeFactory = makeRuntimeFactory(["request", "response"]);
   runtimeFactory()(init);
 
-  const applyRequestMiddleware = makeApplyMiddleware([
-    requestContextMiddleware,
-    requestUrlMiddleware,
-    ...requestMiddleware
-  ]);
-  const applyRouterMiddleware = makeApplyMiddleware(routerMiddleware);
-  const applyResponseMiddleware = makeApplyMiddleware([
-    ...responseMiddleware,
-    sendResponseMiddleware
+  const middlewareActions = applyMiddleware([
+    ...requestMiddleware,
+    ...routerMiddleware,
+    ...responseMiddleware
   ]);
   return (serverRequest, serverResponse) => {
     const runtime = runtimeFactory({
@@ -29,14 +24,9 @@ const makeServerRuntime = ({
       response: serverResponse
     });
 
-    const requestActions = applyRequestMiddleware(serverRequest);
-    const [, requestContext] = runtime(requestActions);
-    const routerActions = applyRouterMiddleware(requestContext);
-    const [, routerContext] = runtime(routerActions);
-    const responseActions = applyResponseMiddleware(routerContext);
-    const responseResults = runtime(responseActions);
+    const runtimeResults = runtime(middlewareActions);
 
-    return responseResults;
+    return runtimeResults;
   };
 };
 

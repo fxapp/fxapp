@@ -1,12 +1,15 @@
-const makeRouterMiddleware = (routes = {}) => (
-  { request: { path } },
-  resultActions
-) => {
-  const matchingRouteKey = Object.keys(routes).find(route =>
-    RegExp(`^${route}$`).test(path)
-  );
-  const matchedRoute = routes[matchingRouteKey];
-  return resultActions.concat(matchedRoute ? matchedRoute : []);
-};
+const makeRouterMiddleware = (routes = {}) =>
+  function routerMiddleware(actions) {
+    return actions.concat(state => {
+      const {
+        request: { path }
+      } = state;
+      const matchingRouteKey = Object.keys(routes).find(route =>
+        RegExp(`^${route}$`).test(path)
+      );
+      const matchedRoute = routes[matchingRouteKey];
+      return matchedRoute && matchedRoute(state);
+    });
+  };
 
 module.exports = makeRouterMiddleware;

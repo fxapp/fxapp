@@ -34,9 +34,7 @@ describe("makeRuntimeFactory", () => {
         props: {
           key: "value"
         },
-        effect({ state, context, fxContext, action }) {
-          expect(state).toEqual({ count: 1 });
-          expect(context).toEqual({});
+        effect({ fxContext, action }) {
           expect(fxContext).toEqual({
             api: expect.any(Function)
           });
@@ -97,9 +95,7 @@ describe("makeRuntimeFactory", () => {
         props: {
           key: "value"
         },
-        effect({ state, context, fxContext, action }) {
-          expect(state).toEqual({ count: 1 });
-          expect(context).toEqual({ a: 1, b: 2 });
+        effect({ fxContext, action }) {
           expect(fxContext).toEqual({
             api: expect.any(Function)
           });

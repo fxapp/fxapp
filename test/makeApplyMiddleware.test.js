@@ -1,26 +1,21 @@
-const makeApplyMiddleware = require("../src/makeApplyMiddleware");
+const applyMiddleware = require("../src/applyMiddleware");
 
-describe("makeApplyMiddleware", () => {
+describe("applyMiddleware", () => {
   it("should be a function", () =>
-    expect(makeApplyMiddleware).toBeInstanceOf(Function));
-  it("should return a function", () =>
-    expect(makeApplyMiddleware()).toBeInstanceOf(Function));
+    expect(applyMiddleware).toBeInstanceOf(Function));
   it("should treat no arguments as an empty action", () =>
-    expect(makeApplyMiddleware()()).toEqual([]));
+    expect(applyMiddleware()).toEqual([]));
   describe("with middleware", () => {
-    const incMiddleware = (action, actions) => [
+    const incMiddleware = actions => [
       ...actions,
-      ({ count }) => ({ count: count + action.by })
+      ({ count }) => ({ count: count + 1 })
     ];
-    const applyMiddleware = makeApplyMiddleware([incMiddleware, incMiddleware]);
-    it("should return a function", () =>
-      expect(applyMiddleware).toBeInstanceOf(Function));
-    it("should be able to return actions that reference the original action", () => {
-      const middlewareResults = applyMiddleware({ by: 1 });
-      expect(middlewareResults[0]({ count: 0 })).toEqual({
+    it("should return actions from middleware", () => {
+      const middlewareActions = applyMiddleware([incMiddleware, incMiddleware]);
+      expect(middlewareActions[0]({ count: 0 })).toEqual({
         count: 1
       });
-      expect(middlewareResults[1]({ count: 1 })).toEqual({
+      expect(middlewareActions[1]({ count: 1 })).toEqual({
         count: 2
       });
     });

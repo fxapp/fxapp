@@ -6,17 +6,16 @@ describe("makeRouterMiddleware", () => {
   describe("without routes", () => {
     it("should return a middleware function", () =>
       expect(makeRouterMiddleware()).toBeInstanceOf(Function));
-    it("should return empty actions", () =>
+    it("should return empty actions", () => {
+      const [middlewareAction] = makeRouterMiddleware()([]);
       expect(
-        makeRouterMiddleware()(
-          {
-            request: {
-              path: "/"
-            }
-          },
-          []
-        )
-      ).toEqual([]));
+        middlewareAction({
+          request: {
+            path: "/"
+          }
+        })
+      ).toBeFalsy();
+    });
   });
   describe("with routes", () => {
     const routerMiddleware = makeRouterMiddleware({
@@ -31,14 +30,18 @@ describe("makeRouterMiddleware", () => {
         }
       })
     });
-    const expectEmptyRouter = path =>
-      expect(routerMiddleware({ request: { path } }, [])).toEqual([]);
-    const expectRouterToReturn = (path, text) =>
-      expect(routerMiddleware({ request: { path } }, [])[0]()).toEqual({
+    const expectEmptyRouter = path => {
+      const [middlewareAction] = routerMiddleware([]);
+      expect(middlewareAction({ request: { path } })).toBeFalsy();
+    };
+    const expectRouterToReturn = (path, text) => {
+      const [middlewareAction] = routerMiddleware([]);
+      expect(middlewareAction({ request: { path } })).toEqual({
         response: {
           text
         }
       });
+    };
     it("should match route exactly", () =>
       expectRouterToReturn("/test", "just testing"));
     it("should not match partial routes", () => expectEmptyRouter("/t"));

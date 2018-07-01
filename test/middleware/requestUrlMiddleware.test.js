@@ -4,12 +4,7 @@ describe("requestUrlMiddleware", () => {
   it("should be a function", () =>
     expect(requestUrlMiddleware).toBeInstanceOf(Function));
   it("should parse url request props", () => {
-    const [middlewareAction] = requestUrlMiddleware(
-      {
-        url: "/test/route?param=value&multiple=true"
-      },
-      []
-    );
+    const [middlewareAction] = requestUrlMiddleware([]);
     expect(
       middlewareAction({
         request: {

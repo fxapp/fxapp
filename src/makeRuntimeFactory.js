@@ -18,10 +18,9 @@ const makeRuntimeFactory = (contextKeys = []) => {
         }
       } else if (isFx(action)) {
         action.effect({
-          state,
-          context,
-          fxContext,
-          action
+          action,
+          dispatch,
+          fxContext
         });
       }
       return [state, context];
