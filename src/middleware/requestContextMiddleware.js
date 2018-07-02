@@ -3,25 +3,30 @@ const { assign } = require("../utils");
 
 const requestEffect = {
   effect: ({ dispatch, fxContext: { request: serverRequest } }) =>
-    dispatch(({ request, response }) => ({
-      request: assign([
-        request,
+    dispatch(state =>
+      assign([
+        state,
         {
-          method: serverRequest.method,
-          url: serverRequest.url,
-          headers: serverRequest.headers
-        }
-      ]),
-      response: assign([
-        response,
-        {
-          statusCode: 200,
-          headers: {
-            Server: `fxapp v${version}`
-          }
+          request: assign([
+            state.request,
+            {
+              method: serverRequest.method,
+              url: serverRequest.url,
+              headers: serverRequest.headers
+            }
+          ]),
+          response: assign([
+            state.response,
+            {
+              statusCode: 200,
+              headers: {
+                Server: `fxapp v${version}`
+              }
+            }
+          ])
         }
       ])
-    }))
+    )
 };
 
 function requestContextMiddleware(actions) {

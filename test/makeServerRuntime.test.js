@@ -1,3 +1,4 @@
+const { assign } = require("../src/utils");
 const makeServerRuntime = require("../src/makeServerRuntime");
 
 describe("makeServerRuntime", () => {
@@ -5,7 +6,7 @@ describe("makeServerRuntime", () => {
     expect(makeServerRuntime).toBeInstanceOf(Function));
   it("should initialize state", () => {
     const serverRuntime = makeServerRuntime({
-      init: () => ({ count: 0 })
+      init: state => assign([state, { count: 0 }])
     });
     expect(
       serverRuntime(

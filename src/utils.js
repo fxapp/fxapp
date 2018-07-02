@@ -7,11 +7,22 @@ const assign = assignments => Object.assign({}, ...assignments);
 
 const entries = obj => Object.keys(obj).map(key => [key, obj[key]]);
 
+const omit = props => object =>
+  assign(
+    Object.keys(object)
+      .filter(key => !props.includes(key))
+      .map(key => ({ [key]: object[key] }))
+  );
+const pick = props => object =>
+  assign(props.map(prop => ({ [prop]: object[prop] })));
+
 module.exports = {
   isArray,
   isFn,
   isObj,
   isFx,
   assign,
-  entries
+  entries,
+  omit,
+  pick
 };

@@ -1,3 +1,4 @@
+const { assign } = require("../src/utils");
 const makeRuntimeFactory = require("../src/makeRuntimeFactory");
 
 const getState = state => state;
@@ -65,10 +66,9 @@ describe("makeRuntimeFactory", () => {
         { count: 0 },
         { a: 1, b: 2 }
       ]);
-      expect(runtime(state => ({ count: state.count + 1 }))).toEqual([
-        { count: 1 },
-        { a: 1, b: 2 }
-      ]);
+      expect(
+        runtime(state => assign([state, { count: state.count + 1 }]))
+      ).toEqual([{ count: 1 }, { a: 1, b: 2 }]);
       expect(runtime(getState)).toEqual([{ count: 1 }, { a: 1, b: 2 }]);
     });
     it("should not update state when dispatching objects but the state and context should be returned", () => {
@@ -77,7 +77,7 @@ describe("makeRuntimeFactory", () => {
       expect(runtime({ count: 1 })).toEqual([{ key: "value" }, { a: 1, b: 2 }]);
     });
     it("should update state when dispatching array of action functions", () => {
-      const incAction = ({ count }) => ({ count: count + 1 });
+      const incAction = state => assign([state, { count: state.count + 1 }]);
       const runtime = makeRuntimeFactory(contextKeys)();
       runtime(() => ({ count: 0, a: 1, b: 2 }));
       expect(runtime([incAction, incAction, incAction])).toEqual([

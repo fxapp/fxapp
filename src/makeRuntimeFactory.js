@@ -1,6 +1,8 @@
-const { isArray, isFn, isFx, assign } = require("./utils");
+const { isArray, isFn, isFx, assign, omit, pick } = require("./utils");
 
 const makeRuntimeFactory = (contextKeys = []) => {
+  const stateOmitter = omit(contextKeys);
+  const contextPicker = pick(contextKeys);
   let state = {};
   return fxContext => {
     let context = {};
@@ -9,12 +11,9 @@ const makeRuntimeFactory = (contextKeys = []) => {
         action.forEach(dispatch);
       } else if (isFn(action)) {
         const actionResult = action(assign([state, context]));
-        for (let key in actionResult) {
-          if (contextKeys.includes(key)) {
-            context[key] = actionResult[key];
-          } else {
-            state[key] = actionResult[key];
-          }
+        if (actionResult) {
+          state = stateOmitter(actionResult);
+          context = contextPicker(actionResult);
         }
       } else if (isFx(action)) {
         action.effect({

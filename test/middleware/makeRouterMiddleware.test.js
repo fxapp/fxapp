@@ -37,6 +37,7 @@ describe("makeRouterMiddleware", () => {
     const expectRouterToReturn = (path, text) => {
       const [middlewareAction] = routerMiddleware([]);
       expect(middlewareAction({ request: { path } })).toEqual({
+        request: { path },
         response: {
           text
         }

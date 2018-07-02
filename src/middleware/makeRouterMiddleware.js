@@ -1,3 +1,5 @@
+const { assign } = require("../utils");
+
 const makeRouterMiddleware = (routes = {}) =>
   function routerMiddleware(actions) {
     return actions.concat(state => {
@@ -8,7 +10,7 @@ const makeRouterMiddleware = (routes = {}) =>
         RegExp(`^${route}$`).test(path)
       );
       const matchedRoute = routes[matchingRouteKey];
-      return matchedRoute && matchedRoute(state);
+      return matchedRoute && assign([state, matchedRoute(state)]);
     });
   };
 
