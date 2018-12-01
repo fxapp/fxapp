@@ -1,20 +1,18 @@
 const isArray = Array.isArray;
 const isFn = value => typeof value === "function";
 const isObj = value => typeof value === "object" && !isArray(value);
-const isFx = value => isObj(value) && isFn(value.effect);
+const isFx = value => isObj(value) && isFn(value.run);
 
-const assign = assignments => Object.assign({}, ...assignments);
+const assign = (...args) => Object.assign({}, ...args);
 
 const entries = obj => Object.keys(obj).map(key => [key, obj[key]]);
 
-const omit = props => object =>
+const omit = (...props) => object =>
   assign(
-    Object.keys(object)
+    ...Object.keys(object)
       .filter(key => !props.includes(key))
       .map(key => ({ [key]: object[key] }))
   );
-const pick = props => object =>
-  assign(props.map(prop => ({ [prop]: object[prop] })));
 
 module.exports = {
   isArray,
@@ -23,6 +21,5 @@ module.exports = {
   isFx,
   assign,
   entries,
-  omit,
-  pick
+  omit
 };

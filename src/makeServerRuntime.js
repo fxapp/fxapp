@@ -1,32 +1,23 @@
-const makeRuntimeFactory = require("./makeRuntimeFactory");
-const applyMiddleware = require("./applyMiddleware");
-const requestContextMiddleware = require("./middleware/requestContextMiddleware");
-const requestUrlMiddleware = require("./middleware/requestUrlMiddleware");
-const sendResponseMiddleware = require("./middleware/sendResponseMiddleware");
+const { assign, omit } = require("./utils");
+const makeFxRuntime = require("./makeFxRuntime");
+const parseRequest = require("./fx/parseRequest");
+const sendResponse = require("./fx/sendResponse");
 
-const makeServerRuntime = ({
-  init,
-  requestMiddleware = [requestContextMiddleware, requestUrlMiddleware],
-  routerMiddleware = [],
-  responseMiddleware = [sendResponseMiddleware]
-}) => {
-  const runtimeFactory = makeRuntimeFactory(["request", "response"]);
-  runtimeFactory()(init);
+const serverStateMerge = (prevState, nextState) =>
+  assign(prevState, omit("request", "response")(nextState), {
+    request: assign(prevState.request, nextState.request),
+    response: assign(prevState.response, nextState.response)
+  });
 
-  const middlewareActions = applyMiddleware([
-    ...requestMiddleware,
-    ...routerMiddleware,
-    ...responseMiddleware
-  ]);
+const makeServerRuntime = router => {
   return (serverRequest, serverResponse) => {
-    const runtime = runtimeFactory({
-      request: serverRequest,
-      response: serverResponse
+    const { dispatch } = makeFxRuntime({
+      mergeState: serverStateMerge,
+      mapProps: props => assign(props, { serverRequest, serverResponse })
     });
-
-    const runtimeResults = runtime(middlewareActions);
-
-    return runtimeResults;
+    dispatch(parseRequest);
+    dispatch(sendResponse);
+    dispatch(router);
   };
 };
 

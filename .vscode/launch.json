@@ -5,17 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "name": "Debug server",
+      "program": "${workspaceFolder}/example/index.js",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug tests",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": [
-        "--runInBand",
-        "--watch"
-      ],
-      "runtimeArgs": [
-        "--nolazy"
-      ],
+      "args": ["--runInBand", "--watch"],
+      "runtimeArgs": ["--nolazy"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }
