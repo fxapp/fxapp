@@ -14,7 +14,7 @@ const responseEffect = (dispatch, { serverResponse }) => {
         serverResponse.setHeader("Content-Type", contentType);
       if (json) {
         setContentType("application/json");
-        serverResponse.end(JSON.stringify(json, null, 2));
+        serverResponse.end(JSON.stringify(json));
       } else if (html) {
         setContentType("text/html");
         serverResponse.end(html);

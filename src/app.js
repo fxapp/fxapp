@@ -4,7 +4,7 @@ const makeServer = require("./makeServer");
 const makeServerRuntime = require("./makeServerRuntime");
 const makeRouter = require("./fx/makeRouter");
 
-module.exports = options =>
+module.exports = (options = {}) =>
   makeServer(
     assign(
       {

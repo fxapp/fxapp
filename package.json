@@ -1,17 +1,10 @@
 {
   "name": "fxapp",
-  "description": "Build JavaScript apps using effects as data",
+  "description": "Build JavaScript server apps using effects as data",
   "version": "0.4.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fxapp/fxapp.git"
-  },
+  "main": "./src/index.js",
   "files": [
     "src"
-  ],
-  "keywords": [
-    "effects",
-    "data"
   ],
   "devDependencies": {
     "eslint": "=5.9.0",
@@ -36,6 +29,7 @@
   },
   "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
   "license": "MIT",
+  "repository": "fxapp/fxapp",
   "bugs": {
     "url": "https://github.com/fxapp/fxapp/issues"
   },
