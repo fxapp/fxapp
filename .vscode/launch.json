@@ -8,7 +8,9 @@
       "type": "node",
       "request": "launch",
       "name": "Debug server",
-      "program": "${workspaceFolder}/example/index.js",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
+      "program": "${workspaceRoot}/example/index.js",
+      "restart": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
@@ -17,8 +19,13 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["--runInBand", "--watch"],
-      "runtimeArgs": ["--nolazy"],
+      "args": [
+        "--runInBand",
+        "--watch"
+      ],
+      "runtimeArgs": [
+        "--nolazy"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

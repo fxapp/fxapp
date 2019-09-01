@@ -7,15 +7,18 @@
     "src"
   ],
   "devDependencies": {
-    "eslint": "=5.9.0",
-    "jest": "=23.6.0"
+    "eslint": "=6.3.0",
+    "jest": "=24.9.0",
+    "nodemon": "=1.19.1",
+    "prettier": "=1.18.2"
   },
   "scripts": {
     "clean": "npx rimraf coverage dist node_modules",
-    "format": "npx prettier --ignore-path .gitignore --write '**/*.js'",
-    "format:check": "npx prettier --ignore-path .gitignore --list-different '**/*.js'",
+    "format": "prettier --ignore-path .gitignore --write '**/*.js'",
+    "format:check": "prettier --ignore-path .gitignore --list-different '**/*.js'",
     "lint": "eslint .",
     "test": "jest --coverage",
+    "start": "nodemon example",
     "check": "npm run format:check && npm run lint && npm t",
     "prepare": "npm run check",
     "release": "./pre-flight-tests && npm run clean && git pull && npm i && git tag $npm_package_version && git push && git push --tags && npm publish"
