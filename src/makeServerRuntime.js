@@ -1,10 +1,10 @@
-const { assign, omit } = require("./utils");
+const { assign } = require("./utils");
 const makeFxRuntime = require("./makeFxRuntime");
 const parseRequest = require("./fx/parseRequest");
 const sendResponse = require("./fx/sendResponse");
 
 const serverStateMerge = (prevState, nextState) =>
-  assign(prevState, omit("request", "response")(nextState), {
+  assign(prevState, {
     request: assign(prevState.request, nextState.request),
     response: assign(prevState.response, nextState.response)
   });

@@ -20,6 +20,11 @@ module.exports = ({
   let state = initialState;
 
   const runFx = fx => {
+    if (isFn(fx)) {
+      dispatch(fx(state));
+      process.nextTick(fxLoop);
+      return Promise.resolve();
+    }
     const props = mapProps(fx);
     runningFx.add(fx);
     const dispatchProxy = dispatched => {
@@ -63,7 +68,8 @@ module.exports = ({
 
   const dispatch = dispatched => {
     if (isFn(dispatched)) {
-      dispatch(dispatched(state));
+      serialFxQueue.enqueue(dispatched);
+      process.nextTick(fxLoop);
     } else if (isArray(dispatched)) {
       dispatched.forEach(dispatch);
     } else if (isFx(dispatched)) {

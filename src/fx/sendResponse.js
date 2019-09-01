@@ -1,5 +1,4 @@
 const fs = require("fs");
-const { entries } = require("../utils");
 
 const responseEffect = ({ dispatch, serverResponse }) => {
   dispatch(
@@ -18,7 +17,7 @@ const responseEffect = ({ dispatch, serverResponse }) => {
     }) => {
       serverResponse.statusCode = statusCode;
       serverResponse.statusMessage = statusMessage;
-      entries(headers || {}).forEach(([name, value]) =>
+      Object.entries(headers || {}).forEach(([name, value]) =>
         serverResponse.setHeader(name, value)
       );
       if (custom) return;
