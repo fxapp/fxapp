@@ -45,13 +45,17 @@ Example:
 ```js
 app({
   routes: {
+    // GET /unknown/path
     _: fallbackAction,
     path: {
       some: {
+        // GET /path/some
         GET: someReadAction,
+        // POST /path/some
         POST: someAddAction
       },
       other: {
+        // GET /path/other/123
         $id: otherAction
       }
     }
@@ -71,6 +75,8 @@ Routes with the name of an [HTTP request method](https://en.wikipedia.org/wiki/H
 
 Routes beginning with `$` are reserved and define a path parameter for matching at that position. In the example above sending a `GET` request to `/path/other/123` will respond with the results of passing `{id: "123"}` as the `request.params` to `otherAction`.
 
+### Advanced: `customFx`
+
 ### Advanced: `httpApi`
 
 ### Advanced: `serverRuntime`
@@ -81,10 +87,10 @@ Routes beginning with `$` are reserved and define a path parameter for matching 
 {
   request: {
     method: "GET",
-    url: "/test/route?param=value&multiple=1&multiple=2",
-    path: "/test/route",
+    url: "/path/other/123?param=value&multiple=1&multiple=2",
+    path: "/path/other/123",
     query: { param: "value", multiple: ["1", "2"] },
-    params: { id: "route" },
+    params: { id: "123" },
     headers: {
       Host: "localhost:8080"
     }
@@ -141,6 +147,10 @@ The [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) 
 
 The [HTTP response headers](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields) to send.
 
+#### `response.custom`
+
+Skip the default logic for sending the response body. Make sure you provide `customFx` to handle this response or the request will hang for the client.
+
 #### `response.json`
 
 The HTTP response body that will be sent as `application/json`. Value will be formatted using `JSON.stringify`.
@@ -149,11 +159,39 @@ The HTTP response body that will be sent as `application/json`. Value will be fo
 
 The HTTP response body that will be sent as `text/html`.
 
+#### `response.filePath`
+
+The HTTP response will pipe the contents of the file at the given path. Never pass user-provided data for this as that would introduce a vulnerability for arbitrary disk access. You may need to add `response.contentType` in order for the client to interpret the response correctly.
+
 #### `response.text`
 
-The HTTP response body that will be sent as `text/plain`.
+The HTTP response body that will be sent as `text/plain` unless a value is passed for `response.contentType`.
 
 ## Dispatchable Types
+
+```js
+StateUpdate = function(state: Object) => newState: Object
+
+ReservedProps = {
+  concurrent: boolean? = false,
+  after: boolean? = false,
+  cancel: boolean? = false
+}
+
+FX = {
+  run: ({
+    dispatch: function(Dispatchable),
+    serverRequest: IncomingMessage,
+    serverResponse: ServerResponse,
+    ...ReservedProps,
+    // Additional props
+  }) => Promise? | undefined,
+  ...ReservedProps,
+  // Additional props
+}
+
+Dispatchable = StateUpdate | FX | [Dispatchable]
+```
 
 ### State Mapping Function `state => newState`
 
@@ -161,21 +199,7 @@ Perform an immutable state update by receiving the current state as a parameter 
 
 ### FX
 
-_FX as data_ are represented with an object containing a `run` function and `props` object that will be passed to the `run` function.
-
-```js
-{
-  run: (dispatch: function(Dispatchable), props: {}) => Promise?
-  props: {
-    concurrent: boolean,
-    after: boolean,
-    cancel: boolean,
-    serverRequest: IncomingMessage,
-    serverResponse: ServerResponse
-    ...
-  }
-}
-```
+_FX as data_ are represented with an object containing a `run` function and additional properties that will be passed to that function.
 
 The `run` function returns a `Promise` if the effect is async. Async FX are considered still running until resolved or rejected. Otherwise FX are considered sync and done once the `run` function returns.
 
@@ -197,7 +221,7 @@ Run FX after all others are complete. Use this for logging, cleanup, or providin
 
 Default: `false`
 
-Cancel all other FX immediately. Cancelled FX are no longer able to dispatch. FX already dispatched with `after` will still be run to allow for the response to be sent. Use this to enforce timeouts for sending responses.
+Cancel all other FX immediately. Cancelled FX are no longer able to dispatch. FX already dispatched with `after` will still be run to allow for the response to be sent. Use this to enforce response timeouts or for handling errors.
 
 #### `serverRequest`
 

@@ -1,7 +1,6 @@
 const makeServer = ({ httpApi, port, serverRuntime }) =>
   new Promise((resolve, reject) =>
-    httpApi
-      .createServer(serverRuntime)
+    httpApi(serverRuntime)
       .listen({ port }, resolve)
       .on("error", reject)
   );

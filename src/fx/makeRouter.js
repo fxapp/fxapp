@@ -4,7 +4,7 @@ const matchRoute = props => {
   const { routes = {}, path = [], params = {}, method = "" } = props;
   if (isFn(routes) || isFx(routes) || isArray(routes)) {
     return {
-      run(dispatch) {
+      run({ dispatch }) {
         dispatch({ request: { params } });
         dispatch(routes);
       }
@@ -38,12 +38,12 @@ const matchRoute = props => {
   }
 };
 
-const routerEffect = (dispatch, { routes }) =>
+const routerEffect = ({ dispatch, routes }) =>
   dispatch(({ request: { path, method } }) =>
     matchRoute({ routes, path: path.split("/").slice(1), method })
   );
 
 module.exports = routes => ({
   run: routerEffect,
-  props: { routes }
+  routes
 });

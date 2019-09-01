@@ -9,7 +9,7 @@ const serverStateMerge = (prevState, nextState) =>
     response: assign(prevState.response, nextState.response)
   });
 
-const makeServerRuntime = router => {
+const makeServerRuntime = customFx => {
   return (serverRequest, serverResponse) => {
     const { dispatch } = makeFxRuntime({
       mergeState: serverStateMerge,
@@ -17,7 +17,7 @@ const makeServerRuntime = router => {
     });
     dispatch(parseRequest);
     dispatch(sendResponse);
-    dispatch(router);
+    dispatch(customFx);
   };
 };
 

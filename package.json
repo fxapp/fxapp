@@ -12,9 +12,9 @@
   },
   "scripts": {
     "clean": "npx rimraf coverage dist node_modules",
-    "format": "npx prettier --write {src,test}/**/*.js",
-    "format:check": "npx prettier --list-different {src,test}/**/*.js",
-    "lint": "eslint {src,test}/**/*.js",
+    "format": "npx prettier --ignore-path .gitignore --write '**/*.js'",
+    "format:check": "npx prettier --ignore-path .gitignore --list-different '**/*.js'",
+    "lint": "eslint .",
     "test": "jest --coverage",
     "check": "npm run format:check && npm run lint && npm t",
     "prepare": "npm run check",

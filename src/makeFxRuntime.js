@@ -1,4 +1,4 @@
-const { isFn, isArray, isFx, isObj } = require("./utils");
+const { isFn, isArray, isFx, isObj, assign } = require("./utils");
 
 const makeQueue = (queue = []) => ({
   enqueue: queue.push.bind(queue),
@@ -20,14 +20,15 @@ module.exports = ({
   let state = initialState;
 
   const runFx = fx => {
-    const props = mapProps(fx.props || {});
+    const props = mapProps(fx);
     runningFx.add(fx);
     const dispatchProxy = dispatched => {
       if (runningFx.has(fx)) {
         dispatch(dispatched);
       }
     };
-    const fxPromise = fx.run(dispatchProxy, props) || Promise.resolve();
+    const fxPromise =
+      fx.run(assign(props, { dispatch: dispatchProxy })) || Promise.resolve();
     return new Promise(resolve => {
       const done = () => {
         runningFx.delete(fx);
@@ -66,12 +67,11 @@ module.exports = ({
     } else if (isArray(dispatched)) {
       dispatched.forEach(dispatch);
     } else if (isFx(dispatched)) {
-      const props = dispatched.props || {};
-      if (props.cancel) {
+      if (dispatched.cancel) {
         runFx(dispatched);
-      } else if (props.concurrent) {
+      } else if (dispatched.concurrent) {
         concurrentFxWaiting.add(dispatched);
-      } else if (props.after) {
+      } else if (dispatched.after) {
         afterFxQueue.enqueue(dispatched);
       } else {
         serialFxQueue.enqueue(dispatched);

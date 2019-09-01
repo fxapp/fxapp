@@ -1,6 +1,6 @@
 const { app } = require("../src");
 
-const delayEffect = (dispatch, { ms, action }) =>
+const delayEffect = ({ dispatch, ms, action }) =>
   new Promise(resolve =>
     setTimeout(() => {
       dispatch(action);
@@ -8,8 +8,8 @@ const delayEffect = (dispatch, { ms, action }) =>
     }, ms)
   );
 const delay = props => ({
-  run: delayEffect,
-  props
+  ...props,
+  run: delayEffect
 });
 
 const addJsonResponse = [

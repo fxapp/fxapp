@@ -2,7 +2,7 @@ const url = require("url");
 const querystring = require("querystring");
 const { version } = require("../../package");
 
-const parseRequestEffect = (dispatch, { serverRequest }) => {
+const parseRequestEffect = ({ dispatch, serverRequest }) => {
   const parsedUrl = url.parse(serverRequest.url);
   dispatch({
     request: {

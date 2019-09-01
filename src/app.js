@@ -1,4 +1,4 @@
-const httpApi = require("http");
+const { createServer: httpApi } = require("http");
 const { assign } = require("./utils");
 const makeServer = require("./makeServer");
 const makeServerRuntime = require("./makeServerRuntime");
@@ -10,7 +10,10 @@ module.exports = (options = {}) =>
       {
         httpApi,
         port: 8080,
-        serverRuntime: makeServerRuntime(makeRouter(options.routes))
+        serverRuntime: makeServerRuntime([
+          options.customFx,
+          makeRouter(options.routes)
+        ])
       },
       options
     )
