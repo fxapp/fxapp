@@ -1,7 +1,7 @@
 const { isArray, isFn, isFx, isObj, assign } = require("../utils");
 
 const matchRoute = props => {
-  const { routes = {}, path = [], params = {}, method = "" } = props;
+  const { path, method, routes = {}, params = {} } = props;
   if (isFn(routes) || isFx(routes) || isArray(routes)) {
     return [{ request: { params } }, routes];
   } else if (isObj(routes)) {
@@ -33,5 +33,5 @@ const matchRoute = props => {
   }
 };
 
-module.exports = routes => ({ request: { path, method } }) =>
+module.exports = routes => ({ request: { method, path = "" } }) =>
   matchRoute({ routes, path: path.split("/").slice(1), method });
