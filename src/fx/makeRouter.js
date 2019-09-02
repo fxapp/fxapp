@@ -6,7 +6,7 @@ const matchRoute = props => {
     return [{ request: { params } }, routes];
   } else if (isObj(routes)) {
     return Object.entries(routes)
-      .sort(([a], [b]) => a < b)
+      .sort(([a], [b]) => (b === "_" ? -1 : a < b))
       .reduce((matched, [subRoutePath, subRoute]) => {
         if (matched) return matched;
         if (
