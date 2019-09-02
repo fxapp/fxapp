@@ -13,7 +13,10 @@ const delay = props => ({
 });
 
 const addJsonResponse = [
-  { other: "state" },
+  state => ({
+    other: "state",
+    count: state.count || 0 + 1
+  }),
   json => ({
     response: {
       json

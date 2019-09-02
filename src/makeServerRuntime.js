@@ -4,7 +4,7 @@ const parseRequest = require("./fx/parseRequest");
 const sendResponse = require("./fx/sendResponse");
 
 const serverStateMerge = (prevState, nextState) =>
-  assign(prevState, {
+  assign(prevState, nextState, {
     request: assign(prevState.request, nextState.request),
     response: assign(prevState.response, nextState.response)
   });
