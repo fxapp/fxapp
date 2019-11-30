@@ -88,5 +88,5 @@ module.exports = ({
     }
   };
 
-  return { dispatch };
+  return { dispatch, getState: () => state };
 };
