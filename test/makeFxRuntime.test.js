@@ -1,10 +1,5 @@
+const afterTicks = require("./afterTicks");
 const makeFxRuntime = require("../src/makeFxRuntime");
-
-const ticks = async ticks => {
-  for (let i = 0; i < ticks; i++) {
-    await new Promise(resolve => process.nextTick(resolve));
-  }
-};
 
 const mergeState = (prevState, nextState) => ({
   ...prevState,
@@ -36,7 +31,7 @@ describe("makeFxRuntime", () => {
     const { dispatch, getState } = makeFxRuntime({ state: { count: 0 } });
     dispatch(({ count }) => ({ count: count + 1 }));
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ count: 1 });
   });
@@ -47,7 +42,7 @@ describe("makeFxRuntime", () => {
     });
     dispatch({ new: "state" });
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ original: "state", new: "state" });
   });
@@ -55,7 +50,7 @@ describe("makeFxRuntime", () => {
     const { dispatch, getState } = makeFxRuntime();
     dispatch([{ count: 0 }, ({ count }) => ({ count: count + 1 })]);
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ count: 1 });
   });
@@ -69,7 +64,7 @@ describe("makeFxRuntime", () => {
       hasProps: true
     });
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ ranFx: true });
   });
@@ -91,7 +86,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ ranFx: false, ranCancel: true });
   });
@@ -113,7 +108,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ ranFx: false, ranCancel: true });
   });
@@ -140,7 +135,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(1);
+    await afterTicks(1);
     expect(triggerDispatch).toBeUndefined();
 
     expect(getState()).toEqual({ ranAsync: false, ranCancel: true });
@@ -170,7 +165,7 @@ describe("makeFxRuntime", () => {
       })
     );
 
-    await ticks(1);
+    await afterTicks(1);
     expect(triggerDispatch).toBeInstanceOf(Function);
     triggerDispatch();
 
@@ -193,7 +188,7 @@ describe("makeFxRuntime", () => {
       hasProps: true
     });
 
-    await ticks(1);
+    await afterTicks(1);
 
     expect(getState()).toEqual({ ranFx: true });
   });
@@ -213,7 +208,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(1);
+    await afterTicks(1);
     expect(triggerDispatch).toBeInstanceOf(Function);
     triggerDispatch();
 
@@ -251,7 +246,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(3);
+    await afterTicks(3);
 
     expect(getState()).toEqual({
       ranFx: ["concurrent1", "concurrent2", "serial", "after"]
@@ -292,7 +287,7 @@ describe("makeFxRuntime", () => {
       }
     });
 
-    await ticks(3);
+    await afterTicks(3);
 
     expect(getState()).toEqual({
       ranSerial: false,

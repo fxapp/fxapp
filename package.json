@@ -30,6 +30,11 @@
       "es6": true
     }
   },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ]
+  },
   "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
   "license": "MIT",
   "repository": "fxapp/fxapp",

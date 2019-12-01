@@ -12,17 +12,11 @@ const delay = props => ({
   run: delayEffect
 });
 
-const addJsonResponse = [
-  state => ({
-    other: "state",
-    count: state.count || 0 + 1
-  }),
-  json => ({
-    response: {
-      json
-    }
-  })
-];
+const addJsonResponse = json => ({
+  response: {
+    json
+  }
+});
 
 const fallBackResponse = () => ({
   response: {
@@ -49,7 +43,11 @@ const routes = {
 };
 
 app({
-  routes
+  routes,
+  customFx: ({ count = 0 }) => ({
+    other: "state",
+    count: count + 1
+  })
 })
   .then(() => {
     console.log("started server");
