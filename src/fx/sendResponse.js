@@ -34,13 +34,16 @@ const responseEffect = ({ dispatch, serverResponse }) => {
         fileStream.on("open", () => {
           if (contentType) {
             setContentType(contentType);
+          } else {
+            setContentType("application/octet-stream");
           }
           fs.createReadStream(filePath).pipe(serverResponse);
         });
         fileStream.on("error", e => {
           // eslint-disable-next-line no-console
           console.error(e);
-          serverResponse.statusCode = 500;
+          serverResponse.statusCode = 404;
+          // browsers aren't happy with an empty response
           serverResponse.end(" ");
         });
       } else if (text) {
