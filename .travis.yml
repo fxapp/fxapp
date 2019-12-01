@@ -1,21 +1,19 @@
 language: node_js
 node_js:
-  - "6"
   - "8"
-  - "9"
+  - "10"
+  - "12"
 
 env:
   - NODE_ENV=development
 
-before_install:
-  - npm i -g npx
+cache:
+  directories:
+    - "node_modules"
 
-install:
-  - npm i
-
-script:
-  - npm run build
-  - npx codecov
+after_success:
+  - npm i -g codecov
+  - codecov
 
 notifications:
   email: false

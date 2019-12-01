@@ -1,2 +1,3 @@
-export { h } from "./h";
-export { app } from "./app";
+const app = require("./app");
+
+module.exports = { app };
