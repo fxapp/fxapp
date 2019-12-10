@@ -14,8 +14,8 @@
   },
   "scripts": {
     "clean": "npx rimraf coverage dist node_modules",
-    "format": "prettier --ignore-path .gitignore --write '**/*.js'",
-    "format:check": "prettier --ignore-path .gitignore --list-different '**/*.js'",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.js\"",
+    "format:check": "prettier --ignore-path .gitignore --list-different \"**/*.js\"",
     "lint": "eslint .",
     "test": "jest --coverage",
     "start": "nodemon example",

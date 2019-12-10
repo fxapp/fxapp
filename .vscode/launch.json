@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Debug server",
-      "runtimeExecutable": "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/nodemon",
       "program": "${workspaceRoot}/example/index.js",
       "restart": true,
       "console": "integratedTerminal",
