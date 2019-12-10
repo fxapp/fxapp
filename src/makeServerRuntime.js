@@ -1,6 +1,7 @@
 const { assign } = require("./utils");
 const makeFxRuntime = require("./makeFxRuntime");
 const parseRequest = require("./fx/parseRequest");
+const parseBody = require("./fx/parseBody");
 const sendResponse = require("./fx/sendResponse");
 
 const serverStateMerge = (globalState, prevState, nextState) => {
@@ -16,8 +17,8 @@ const serverStateMerge = (globalState, prevState, nextState) => {
   });
 };
 
-const makeServerRuntime = customFx => {
-  const globalState = {};
+const makeServerRuntime = ({ state, customFx } = {}) => {
+  const globalState = assign(state);
   const mergeState = serverStateMerge.bind(null, globalState);
   return (serverRequest, serverResponse) => {
     const { dispatch } = makeFxRuntime({
@@ -25,6 +26,8 @@ const makeServerRuntime = customFx => {
       mapProps: props => assign(props, { serverRequest, serverResponse })
     });
     dispatch(parseRequest);
+    // TODO: add option for skipping body parsing?
+    dispatch(parseBody);
     dispatch(sendResponse);
     dispatch(customFx);
   };

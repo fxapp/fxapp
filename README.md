@@ -75,6 +75,12 @@ Routes with the name of an [HTTP request method](https://en.wikipedia.org/wiki/H
 
 Routes beginning with `$` are reserved and define a path parameter for matching at that position. In the example above sending a `GET` request to `/path/other/123` will respond with the results of passing `{id: "123"}` as the `request.params` to `otherAction`.
 
+### `state`
+
+Default: `{}`
+
+Optional initial global state values that are shared across all requests.
+
 ### Advanced: `customFx`
 
 ### Advanced: `httpApi`
@@ -132,6 +138,14 @@ An object containing path parameters from the router.
 #### `request.headers`
 
 An object containing all [HTTP request headers](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Standard_request_fields).
+
+#### `request.body`
+
+The contents of the request body. Respects the [`Content-Length`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length) header.
+
+#### `request.jsonBody`
+
+This will be set if the `Content-Type` of the request is `application/json` and the body content is valid JSON.
 
 ### `response`
 

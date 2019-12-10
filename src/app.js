@@ -18,9 +18,9 @@ module.exports = options => {
   return mergedOptions.makeServer({
     port: mergedOptions.port,
     httpApi: mergedOptions.httpApi,
-    serverRuntime: mergedOptions.makeServerRuntime([
-      options.customFx,
-      mergedOptions.makeRouter(options.routes)
-    ])
+    serverRuntime: mergedOptions.makeServerRuntime({
+      state: options.state,
+      customFx: [options.customFx, mergedOptions.makeRouter(options.routes)]
+    })
   });
 };

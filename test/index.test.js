@@ -13,12 +13,16 @@ describe("app", () => {
         httpApi,
         makeServer: options => options,
         makeServerRuntime: fx => fx,
-        makeRouter: () => router
+        makeRouter: () => router,
+        state: { initial: "state" }
       })
     ).toEqual({
       port: 666,
       httpApi,
-      serverRuntime: [customFx, router]
+      serverRuntime: {
+        state: { initial: "state" },
+        customFx: [customFx, router]
+      }
     });
   });
 });
