@@ -6,14 +6,13 @@ const matchRoute = props => {
     return [{ request: { params } }, routes];
   } else if (isObj(routes)) {
     return Object.entries(routes)
-      .sort(([a], [b]) => (b === "_" ? -1 : a < b))
+      .sort(([a], [b]) => {
+        if (b === "_") return -1;
+        if (b[0] === "$") return 1;
+        return a < b ? -1 : 1;
+      })
       .reduce((matched, [subRoutePath, subRoute]) => {
         if (matched) return matched;
-        if (
-          subRoutePath === "_" ||
-          subRoutePath.toLowerCase() === method.toLowerCase()
-        )
-          return matchRoute(assign(props, { routes: subRoute }));
         if (subRoutePath === path[0])
           return matchRoute(
             assign(props, {
@@ -21,7 +20,7 @@ const matchRoute = props => {
               path: path.slice(1)
             })
           );
-        if (subRoutePath[0] === "$")
+        if (subRoutePath[0] === "$" && path[0])
           return matchRoute(
             assign(props, {
               routes: subRoute,
@@ -29,6 +28,11 @@ const matchRoute = props => {
               params: assign(params, { [subRoutePath.slice(1)]: path[0] })
             })
           );
+        if (
+          subRoutePath === "_" ||
+          subRoutePath.toLowerCase() === method.toLowerCase()
+        )
+          return matchRoute(assign(props, { routes: subRoute }));
       }, null);
   }
 };

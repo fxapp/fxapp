@@ -63,4 +63,24 @@ describe("makeRouter", () => {
         })
       ).toEqual([{ request: { params: { id: "123" } } }, otherAction]));
   });
+  it("should handle precedence for same method nested in a route with path param", () => {
+    const rootAction = jest.fn();
+    const nestedAction = jest.fn();
+    const router = makeRouter({
+      $id: {
+        GET: nestedAction
+      },
+      GET: rootAction
+    });
+    expect(
+      router({
+        request: { path: "/", method: "GET" }
+      })
+    ).toEqual([{ request: { params: {} } }, rootAction]);
+    expect(
+      router({
+        request: { path: "/123", method: "GET" }
+      })
+    ).toEqual([{ request: { params: { id: "123" } } }, nestedAction]);
+  });
 });
