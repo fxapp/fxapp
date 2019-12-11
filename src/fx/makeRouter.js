@@ -7,8 +7,10 @@ const matchRoute = props => {
   } else if (isObj(routes)) {
     return Object.entries(routes)
       .sort(([a], [b]) => {
-        if (b === "_") return -1;
-        if (b[0] === "$") return 1;
+        if (a[0] === "$") return -1;
+        else if (b === "_") return -1;
+        else if (a === "_") return 1;
+        else if (b[0] === "$") return 1;
         return a < b ? -1 : 1;
       })
       .reduce((matched, [subRoutePath, subRoute]) => {
