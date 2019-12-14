@@ -2,6 +2,9 @@ const { createServer } = require("http");
 const { assign } = require("./utils");
 const makeServer = require("./makeServer");
 const makeServerRuntime = require("./makeServerRuntime");
+const parseRequest = require("./fx/parseRequest");
+const parseBody = require("./fx/parseBody");
+const sendResponse = require("./fx/sendResponse");
 const makeRouter = require("./fx/makeRouter");
 
 module.exports = options => {
@@ -11,16 +14,29 @@ module.exports = options => {
       httpApi: createServer,
       makeServer,
       makeServerRuntime,
+      parseRequest,
+      parseBody,
+      sendResponse,
       makeRouter
     },
     options
   );
-  return mergedOptions.makeServer({
-    port: mergedOptions.port,
-    httpApi: mergedOptions.httpApi,
-    serverRuntime: mergedOptions.makeServerRuntime({
-      state: options.state,
-      customFx: [options.customFx, mergedOptions.makeRouter(options.routes)]
+  return mergedOptions
+    .makeServerRuntime({
+      initFx: options.initFx,
+      requestFx: [
+        mergedOptions.parseRequest,
+        mergedOptions.parseBody,
+        options.requestFx,
+        mergedOptions.makeRouter(options.routes),
+        mergedOptions.sendResponse
+      ]
     })
-  });
+    .then(serverRuntime =>
+      mergedOptions.makeServer({
+        port: mergedOptions.port,
+        httpApi: mergedOptions.httpApi,
+        serverRuntime
+      })
+    );
 };

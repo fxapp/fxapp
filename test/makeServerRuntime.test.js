@@ -1,95 +1,78 @@
 const afterTicks = require("./afterTicks");
 const makeServerRuntime = require("../src/makeServerRuntime");
-const { version } = require("../package");
 
 describe("makeServerRuntime", () => {
   it("should be a function", () =>
     expect(makeServerRuntime).toBeInstanceOf(Function));
-  it("should parse request and send response", async () => {
-    const runtime = makeServerRuntime();
-    const setHeader = jest.fn();
-    const end = jest.fn();
-    let onDataEnd;
-    const serverRequest = {
-      url: "",
-      on(eventName, callback) {
-        if (eventName === "end") {
-          onDataEnd = callback;
-        }
-      }
-    };
-    const serverResponse = { setHeader, end };
-    runtime(serverRequest, serverResponse);
+  it("should dispatch init fx", async () => {
+    const initFx = jest.fn();
+    makeServerRuntime({ initFx });
+    await afterTicks(1);
 
-    await afterTicks(2);
-    expect(onDataEnd).toBeInstanceOf(Function);
-    onDataEnd();
-    await afterTicks(2);
-
-    expect(serverResponse.statusCode).toBe(200);
-    expect(setHeader).toBeCalledWith("Server", `fxapp v${version}`);
-    expect(end).toBeCalledWith();
+    expect(initFx).toBeCalled();
   });
-  it("should run custom fx and merge request/response state", async () => {
-    const runtime = makeServerRuntime({
-      customFx: [
-        ({ response }) => ({ request: { custom: response.statusCode + 1 } }),
-        ({ request }) => ({ response: { statusCode: request.custom } })
-      ]
-    });
-    const end = jest.fn();
-    let onDataEnd;
-    const serverRequest = {
-      url: "",
-      on(eventName, callback) {
-        if (eventName === "end") {
-          onDataEnd = callback;
-        }
-      }
-    };
-    const serverResponse = { setHeader: jest.fn(), end };
-    runtime(serverRequest, serverResponse);
+  it("should dispatch request fx when called", async () => {
+    const requestFx = jest.fn();
+    const serverRuntime = await makeServerRuntime({ requestFx });
+    serverRuntime();
+    await afterTicks(1);
 
-    await afterTicks(2);
-    expect(onDataEnd).toBeInstanceOf(Function);
-    onDataEnd();
-    await afterTicks(2);
-
-    expect(serverResponse.statusCode).toBe(201);
+    expect(requestFx).toBeCalled();
   });
-  it("should treat state outside of request/response as global to all requests", async () => {
-    const runtime = makeServerRuntime({
-      state: { count: 0 },
-      customFx: [
-        ({ count }) => ({
-          count: count + 1,
-          response: { text: String(count) }
-        })
-      ]
-    });
-    let onDataEnd;
-    const serverRequest = {
-      url: "",
-      on(eventName, callback) {
-        if (eventName === "end") {
-          onDataEnd = callback;
+  it("should merge request state", async () => {
+    const serverResponse = {
+      send: jest.fn()
+    };
+    const requestFx = [
+      {
+        run({ dispatch, serverRequest }) {
+          dispatch({
+            request: { count: serverRequest.count },
+            response: { method: "send" }
+          });
+        }
+      },
+      ({ request: { count } }) => ({
+        request: { count: count + 1 },
+        response: { text: count + 1 }
+      }),
+      {
+        run({ dispatch, serverResponse }) {
+          dispatch(({ response: { method, text } }) => {
+            expect(method).toBe("send");
+            serverResponse[method](text);
+          });
         }
       }
-    };
-    const end1 = jest.fn();
-    runtime(serverRequest, { setHeader: jest.fn(), end: end1 });
-    await afterTicks(2);
-    expect(onDataEnd).toBeInstanceOf(Function);
-    onDataEnd();
-    await afterTicks(2);
-    expect(end1).toBeCalledWith("0");
+    ];
+    const serverRuntime = await makeServerRuntime({ requestFx });
+    serverRuntime({ count: 0 }, serverResponse);
+    await afterTicks(4);
 
-    const end2 = jest.fn();
-    runtime(serverRequest, { setHeader: jest.fn(), end: end2 });
-    await afterTicks(2);
-    expect(onDataEnd).toBeInstanceOf(Function);
-    onDataEnd();
-    await afterTicks(2);
-    expect(end2).toBeCalledWith("1");
+    expect(serverResponse.send).toBeCalledWith(1);
+  });
+  it("should preserve state outside of request/response as global", async () => {
+    const requestFx = [
+      ({ count }) => ({
+        count: count + 1
+      }),
+      {
+        run({ dispatch, serverResponse }) {
+          dispatch(({ count }) => {
+            serverResponse.send(count);
+          });
+        }
+      }
+    ];
+    const serverRuntime = await makeServerRuntime({
+      initFx: { count: 0 },
+      requestFx
+    });
+    const serverResponse1 = {
+      send: jest.fn()
+    };
+    serverRuntime({}, serverResponse1);
+    await afterTicks(5);
+    expect(serverResponse1.send).toBeCalledWith(1);
   });
 });

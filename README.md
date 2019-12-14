@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/fxapp/fxapp/branch/master/graph/badge.svg)](https://codecov.io/gh/fxapp/fxapp)
 [![npm](https://img.shields.io/npm/v/fxapp.svg)](https://www.npmjs.org/package/fxapp)
 
-Build JavaScript server apps using _effects as data_.
+Build JavaScript server apps using [_effects as data_](https://youtu.be/6EdXaWfoslc). Requests and responses are represented as data and FX use this data to interact with the imperative [IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage) and [ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse) APIs provided by Node.
 
 ## Getting Started
 
@@ -33,6 +33,14 @@ app({
 Default: `8080`
 
 The port on which the server will listen.
+
+### `initFx`
+
+Optional initial [`dispatch`able(s)](#dispatchable-types) that are run on server start before accepting any requests. Use this to set initial global state or for side effectful initialization like opening required resources or network connections.
+
+### `requestFx`
+
+Optional [`dispatch`able(s)](#dispatchable-types) that are run on every request before the router. Use this for parsing custom request data, custom routing, sending [custom responses](#responsecustom), or side FX like logging.
 
 ### `routes`
 
@@ -74,18 +82,6 @@ Routes with the name of an [HTTP request method](https://en.wikipedia.org/wiki/H
 #### Path Params
 
 Routes beginning with `$` are reserved and define a path parameter for matching at that position. In the example above sending a `GET` request to `/path/other/123` will respond with the results of passing `{id: "123"}` as the `request.params` to `otherAction`.
-
-### `state`
-
-Default: `{}`
-
-Optional initial global state values that are shared across all requests.
-
-### Advanced: `customFx`
-
-### Advanced: `httpApi`
-
-### Advanced: `serverRuntime`
 
 ## State Shape
 
@@ -163,7 +159,7 @@ The [HTTP response headers](https://en.wikipedia.org/wiki/List_of_HTTP_header_fi
 
 #### `response.custom`
 
-Skip the default logic for sending the response body. Make sure you provide `customFx` to handle this response or the request will hang for the client.
+Skip the default logic for sending the response body. Make sure you provide [`requestFx`](#requestfx) to handle this response or the request will hang for the client.
 
 #### `response.json`
 

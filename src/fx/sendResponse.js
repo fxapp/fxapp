@@ -61,6 +61,6 @@ const responseEffect = ({ dispatch, serverResponse }) => {
 };
 
 module.exports = {
-  run: responseEffect,
-  after: true
+  after: true,
+  run: responseEffect
 };

@@ -2,26 +2,33 @@ const { app } = require("../src");
 
 describe("app", () => {
   it("should be a function", () => expect(app).toBeInstanceOf(Function));
-  it("should wire together all the APIs", () => {
+  it("should wire together all the APIs", async () => {
     const httpApi = jest.fn();
-    const customFx = jest.fn();
+    const initFx = jest.fn();
+    const parseRequest = jest.fn();
+    const parseBody = jest.fn();
+    const sendResponse = jest.fn();
+    const requestFx = jest.fn();
     const router = jest.fn();
     expect(
-      app({
+      await app({
         port: 666,
-        customFx,
         httpApi,
-        makeServer: options => options,
-        makeServerRuntime: fx => fx,
+        makeServer: options => Promise.resolve(options),
+        makeServerRuntime: fx => Promise.resolve(fx),
+        initFx,
+        parseRequest,
+        parseBody,
+        requestFx,
         makeRouter: () => router,
-        state: { initial: "state" }
+        sendResponse
       })
     ).toEqual({
       port: 666,
       httpApi,
       serverRuntime: {
-        state: { initial: "state" },
-        customFx: [customFx, router]
+        initFx,
+        requestFx: [parseRequest, parseBody, requestFx, router, sendResponse]
       }
     });
   });

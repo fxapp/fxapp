@@ -1,28 +1,22 @@
+const path = require("path");
+const fs = require("fs");
 const { app } = require("../src");
 
-const delayEffect = ({ dispatch, ms, action }) =>
-  new Promise(resolve =>
-    setTimeout(() => {
-      dispatch(action);
-      resolve();
-    }, ms)
-  );
-const delay = props => ({
-  ...props,
-  run: delayEffect
-});
+const HEROS_PATH = path.resolve(__dirname, "heros.json");
 
-const addJsonResponse = json => ({
-  response: {
-    json
-  }
-});
-
-const fallBackResponse = () => ({
-  response: {
-    text: "these aren't the droids you're looking for..."
-  }
-});
+const initialState = {
+  count: 0,
+  heros: [
+    {
+      id: 0,
+      name: "Superman"
+    },
+    {
+      id: 1,
+      name: "Flash"
+    }
+  ]
+};
 
 const GetHeros = ({ heros }) => ({ response: { json: heros } });
 const GetHero = ({
@@ -85,53 +79,74 @@ const RemoveHero = ({
     ? { heros: updatedHeros, response: { statusCode: 204 } }
     : { response: { statusCode: 404 } };
 };
-
-const routes = {
-  _: fallBackResponse,
-  heros: {
-    GET: GetHeros,
-    POST: AddHero,
-    $id: {
-      GET: GetHero,
-      PUT: UpdateHero,
-      DELETE: RemoveHero
-    }
-  },
-  test: {
-    special: {
-      path: () => ({
-        response: {
-          statusCode: 418,
-          text: "inline response"
-        }
-      })
-    },
-    $id: {
-      GET: addJsonResponse,
-      POST: delay({ ms: 2000, action: addJsonResponse })
-    }
+const ReadHerosEffect = {
+  run({ dispatch }) {
+    try {
+      const data = fs.readFileSync(HEROS_PATH);
+      if (data) dispatch({ heros: JSON.parse(data) });
+    } catch (e) {}
+  }
+};
+const WriteHerosEffect = {
+  run({ dispatch }) {
+    dispatch(({ heros }) => {
+      fs.writeFileSync(HEROS_PATH, JSON.stringify(heros, null, 2));
+    });
   }
 };
 
-app({
-  state: {
-    count: 0,
-    heros: [
-      {
-        id: 0,
-        name: "Superman"
-      },
-      {
-        id: 1,
-        name: "Flash"
-      }
-    ]
+const routes = {
+  _: () => ({
+    response: {
+      statusCode: 404,
+      text: "these aren't the droids you're looking for..."
+    }
+  }),
+  heros: {
+    GET: GetHeros,
+    POST: [AddHero, WriteHerosEffect],
+    $id: {
+      GET: GetHero,
+      PUT: [UpdateHero, WriteHerosEffect],
+      DELETE: [RemoveHero, WriteHerosEffect]
+    }
   },
-  routes,
-  customFx: ({ count }) => ({
-    other: "state",
-    count: count + 1
+  debug: json => ({
+    response: {
+      json
+    }
   })
+};
+
+const LoggingFx = [
+  () => ({
+    request: {
+      startedAt: Date.now()
+    }
+  }),
+  {
+    after: true,
+    run({ dispatch }) {
+      dispatch(({ request, response }) => {
+        const duration = Date.now() - request.startedAt;
+        console.log(
+          `${request.method} ${request.url} -> ${response.statusCode} in ${duration}ms`
+        );
+      });
+    }
+  }
+];
+
+app({
+  initFx: [initialState, ReadHerosEffect],
+  routes,
+  requestFx: [
+    ({ count }) => ({
+      other: "state",
+      count: count + 1
+    }),
+    LoggingFx
+  ]
 })
   .then(() => {
     console.log("started server");

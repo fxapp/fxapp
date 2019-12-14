@@ -19,6 +19,7 @@ const parseBodyEffect = ({ dispatch, serverRequest }) =>
     serverRequest.on("end", () => {
       let jsonBody;
       try {
+        // TODO: still attempt parse if the body starts with a valid JSON character?
         if (serverRequest.headers["content-type"] === "application/json") {
           jsonBody = JSON.parse(body);
         }
