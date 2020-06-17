@@ -23,6 +23,10 @@
     "prepare": "npm run check",
     "release": "./pre-flight-tests && npm run clean && git pull && npm i && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
+  "prettier": {
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  },
   "eslintConfig": {
     "extends": "eslint:recommended",
     "env": {
