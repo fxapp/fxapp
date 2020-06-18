@@ -180,7 +180,9 @@ The HTTP response body that will be sent as `text/plain` unless a value is passe
 ## Dispatchable Types
 
 ```js
-StateUpdate = function(state: Object) => newState: Object
+StateUpdate = function(state: Object, props: Object) => newState: Object
+
+StateUpdateWithProps = [StateUpdate, props: Object]
 
 ReservedProps = {
   concurrent: boolean? = false,
@@ -200,20 +202,22 @@ FX = {
   // Additional props
 }
 
-Dispatchable = StateUpdate | FX | [Dispatchable]
+FXWithProps = [FX, props: Object]
+
+Dispatchable = StateUpdate | StateUpdateWithProps | FX | FXWithProps | [Dispatchable]
 ```
 
 ### State Mapping Function `state => newState`
 
-Perform an immutable state update by receiving the current state as a parameter and returning the new state. Automatically shallow merges root properties in addition to one level under `request` and `response`.
+Perform an immutable state update by receiving the current state as a parameter and returning the new state. Automatically shallow merges root properties in addition to one level under `request` and `response`. Optional `props` may be passed at the time of dispatch using a tuple represented as an array of `[stateMapping, props]`.
 
 ### FX
 
-_FX as data_ are represented with an object containing a `run` function and additional properties that will be passed to that function.
+_FX as data_ are represented with an object containing a `run` function and properties that will be passed to that function. Props may also optionally be passed at the time of dispatch using a tuple represented as an array of `[fx, props]`, which will be merged with the props defined on the FX object. Props passed during dispatch will override those defined on the FX when the same key is used.
 
 The `run` function returns a `Promise` if the effect is async. Async FX are considered still running until resolved or rejected. Otherwise FX are considered sync and done once the `run` function returns.
 
-Some `props` are reserved and have special meaning:
+Some props are reserved and have special meaning:
 
 #### `concurrent`
 

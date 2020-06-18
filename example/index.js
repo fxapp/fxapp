@@ -2,6 +2,25 @@ const path = require("path");
 const fs = require("fs");
 const { app } = require("../src");
 
+const ReadJsonFileEffect = {
+  run: ({ path, dispatch, onSuccess, onError }) => {
+    try {
+      const data = fs.readFileSync(path);
+      if (data) {
+        dispatch(onSuccess, JSON.parse(data));
+      }
+    } catch (e) {
+      dispatch(onError, e);
+    }
+  }
+};
+
+const WriteJsonFileEffect = {
+  run({ path, data }) {
+    fs.writeFileSync(path, JSON.stringify(data, null, 2));
+  }
+};
+
 const HEROS_PATH = path.resolve(__dirname, "heros.json");
 
 const initialState = {
@@ -79,21 +98,16 @@ const RemoveHero = ({
     ? { heros: updatedHeros, response: { statusCode: 204 } }
     : { response: { statusCode: 404 } };
 };
-const ReadHerosEffect = {
-  run({ dispatch }) {
-    try {
-      const data = fs.readFileSync(HEROS_PATH);
-      if (data) dispatch({ heros: JSON.parse(data) });
-    } catch (e) {}
-  }
-};
-const WriteHerosEffect = {
-  run({ dispatch }) {
-    dispatch(({ heros }) => {
-      fs.writeFileSync(HEROS_PATH, JSON.stringify(heros, null, 2));
-    });
-  }
-};
+
+const ReadHerosEffect = [
+  ReadJsonFileEffect,
+  { path: HEROS_PATH, onSuccess: (_, heros) => ({ heros }) }
+];
+
+const WriteHerosEffect = ({ heros }) => [
+  WriteJsonFileEffect,
+  { path: HEROS_PATH, data: heros }
+];
 
 const routes = {
   _: () => ({
@@ -119,11 +133,16 @@ const routes = {
 };
 
 const LoggingFx = [
-  () => ({
-    request: {
-      startedAt: Date.now()
+  {
+    run({ dispatch }) {
+      const startedAt = Date.now();
+      dispatch({
+        request: {
+          startedAt
+        }
+      });
     }
-  }),
+  },
   {
     after: true,
     run({ dispatch }) {

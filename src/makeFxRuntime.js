@@ -1,4 +1,4 @@
-const { isFn, isArray, isFx, isObj, assign } = require("./utils");
+const { isFn, isArray, isFx, isObj, isPropsTuple, assign } = require("./utils");
 
 const makeQueue = (queue = []) => ({
   enqueue: queue.push.bind(queue),
@@ -12,35 +12,37 @@ module.exports = ({
   mergeState = (prevState, nextState) => nextState,
   mapProps = props => props
 } = {}) => {
-  const concurrentFxWaiting = new Set();
+  const concurrentFxWithPropsWaiting = new Set();
   const concurrentFxRunning = new Set();
-  const serialFxQueue = makeQueue();
-  const afterFxQueue = makeQueue();
+  const serialFxWithPropsQueue = makeQueue();
+  const afterFxWithPropsQueue = makeQueue();
   const runningFx = new Set();
   let state = initialState;
 
-  const runFx = fx => {
+  const runFxWithProps = ([fx, dispatchProps]) => {
     if (isFn(fx)) {
-      dispatch(fx(state));
+      dispatch(fx(state, dispatchProps));
       process.nextTick(fxLoop);
       return Promise.resolve();
     }
-    const props = mapProps(fx);
-    runningFx.add(fx);
-    const dispatchProxy = dispatched => {
+    const dispatchProxy = (dispatched, props) => {
       if (runningFx.has(fx)) {
-        dispatch(dispatched);
+        dispatch(dispatched, props);
       }
     };
-    const fxPromise =
-      fx.run(assign(props, { dispatch: dispatchProxy })) || Promise.resolve();
+    const runtimeProps = mapProps(
+      assign(fx, dispatchProps, { dispatch: dispatchProxy })
+    );
+    runningFx.add(fx);
+
+    const fxPromise = fx.run(runtimeProps) || Promise.resolve();
     return new Promise(resolve => {
       const done = () => {
         runningFx.delete(fx);
-        if (props.cancel) {
+        if (runtimeProps.cancel) {
           runningFx.clear();
-          concurrentFxWaiting.clear();
-          serialFxQueue.clear();
+          concurrentFxWithPropsWaiting.clear();
+          serialFxWithPropsQueue.clear();
         }
         process.nextTick(fxLoop);
         resolve();
@@ -50,37 +52,42 @@ module.exports = ({
   };
 
   const fxLoop = () => {
-    for (const fx of concurrentFxWaiting) {
-      concurrentFxWaiting.delete(fx);
-      runFx(fx).then(() => {
-        concurrentFxRunning.delete(fx);
+    for (const fxWithProps of concurrentFxWithPropsWaiting) {
+      const [concurrentFx] = fxWithProps;
+      concurrentFxWithPropsWaiting.delete(fxWithProps);
+      runFxWithProps(fxWithProps).then(() => {
+        concurrentFxRunning.delete(concurrentFx);
       });
-      concurrentFxRunning.add(fx);
+      concurrentFxRunning.add(concurrentFx);
     }
     if (concurrentFxRunning.size === 0 && runningFx.size === 0) {
-      if (serialFxQueue.notEmpty()) {
-        runFx(serialFxQueue.dequeue());
-      } else if (afterFxQueue.notEmpty()) {
-        runFx(afterFxQueue.dequeue());
+      if (serialFxWithPropsQueue.notEmpty()) {
+        runFxWithProps(serialFxWithPropsQueue.dequeue());
+      } else if (afterFxWithPropsQueue.notEmpty()) {
+        runFxWithProps(afterFxWithPropsQueue.dequeue());
       }
     }
   };
 
-  const dispatch = dispatched => {
+  const dispatch = (dispatched, props) => {
     if (isFn(dispatched)) {
-      serialFxQueue.enqueue(dispatched);
+      serialFxWithPropsQueue.enqueue([dispatched, props]);
       process.nextTick(fxLoop);
     } else if (isArray(dispatched)) {
-      dispatched.forEach(dispatch);
+      if (isPropsTuple(dispatched)) {
+        dispatch(dispatched[0], dispatched[1]);
+      } else {
+        dispatched.forEach(dispatch);
+      }
     } else if (isFx(dispatched)) {
       if (dispatched.cancel) {
-        runFx(dispatched);
+        runFxWithProps([dispatched, props]);
       } else if (dispatched.concurrent) {
-        concurrentFxWaiting.add(dispatched);
+        concurrentFxWithPropsWaiting.add([dispatched, props]);
       } else if (dispatched.after) {
-        afterFxQueue.enqueue(dispatched);
+        afterFxWithPropsQueue.enqueue([dispatched, props]);
       } else {
-        serialFxQueue.enqueue(dispatched);
+        serialFxWithPropsQueue.enqueue([dispatched, props]);
       }
       process.nextTick(fxLoop);
     } else if (isObj(dispatched)) {

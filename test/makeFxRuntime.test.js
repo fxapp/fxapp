@@ -35,6 +35,14 @@ describe("makeFxRuntime", () => {
 
     expect(getState()).toEqual({ count: 1 });
   });
+  it("should handle dispatching tuples of state update function and props", async () => {
+    const { dispatch, getState } = makeFxRuntime({ state: { count: 0 } });
+    dispatch([({ count }, { upBy }) => ({ count: count + upBy }), { upBy: 2 }]);
+
+    await afterTicks(1);
+
+    expect(getState()).toEqual({ count: 2 });
+  });
   it("should support custom mergeState", async () => {
     const { dispatch, getState } = makeFxRuntime({
       state: { original: "state" },
@@ -295,6 +303,22 @@ describe("makeFxRuntime", () => {
       ranAfter: true,
       ranCancel: true
     });
+  });
+  it("should handle dispatching tuples of fx and props and merge the props", async () => {
+    const { dispatch, getState } = makeFxRuntime({ state: { ranFx: false } });
+    const fx = {
+      run({ dispatch, hasFxProps, hasDispatchProps }) {
+        expect(hasFxProps).toEqual(true);
+        expect(hasDispatchProps).toEqual(true);
+        dispatch({ ranFx: true });
+      },
+      hasFxProps: true
+    };
+    dispatch([fx, { hasDispatchProps: true }]);
+
+    await afterTicks(1);
+
+    expect(getState()).toEqual({ ranFx: true });
   });
   it("should ignore unsupported dispatch types", () => {
     const { dispatch, getState } = makeFxRuntime({});
