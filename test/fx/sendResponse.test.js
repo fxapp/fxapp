@@ -128,7 +128,7 @@ describe("sendResponse", () => {
     fs.createReadStream.mockReturnValue({
       on: jest.fn((type, fn) => {
         if (type === "error") {
-          fn();
+          fn("expected error opening file for testing");
         }
       }),
       pipe
