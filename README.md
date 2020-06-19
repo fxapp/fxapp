@@ -64,6 +64,7 @@ app({
       },
       other: {
         // GET /path/other/123
+        // { request: { params: { id: "123" } } }
         $id: otherAction
       }
     }
