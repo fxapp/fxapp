@@ -21,11 +21,11 @@ const WriteJsonFileEffect = {
   }
 };
 
-const HEROS_PATH = path.resolve(__dirname, "heros.json");
+const HEROES_PATH = path.resolve(__dirname, "heroes.json");
 
 const initialState = {
   count: 0,
-  heros: [
+  heroes: [
     {
       id: 0,
       name: "Superman"
@@ -37,29 +37,29 @@ const initialState = {
   ]
 };
 
-const GetHeros = ({ heros }) => ({ response: { json: heros } });
+const GetHeroes = ({ heroes }) => ({ response: { json: heroes } });
 const GetHero = ({
   request: {
     params: { id }
   },
-  heros
+  heroes
 }) => {
-  const hero = heros.find(hero => hero.id == id);
+  const hero = heroes.find(hero => hero.id == id);
   return hero
     ? { response: { json: hero } }
     : { response: { statusCode: 404 } };
 };
-const AddHero = ({ request: { jsonBody }, heros }) => {
+const AddHero = ({ request: { jsonBody }, heroes }) => {
   if (!jsonBody || !jsonBody.name) {
     return { response: { statusCode: 400 } };
   }
   const hero = {
-    id: heros.length,
+    id: heroes.length,
     ...jsonBody
   };
   return {
     response: { statusCode: 201, json: hero },
-    heros: heros.concat(hero)
+    heroes: heroes.concat(hero)
   };
 };
 const UpdateHero = ({
@@ -67,13 +67,13 @@ const UpdateHero = ({
     params: { id },
     jsonBody
   },
-  heros
+  heroes
 }) => {
   if (!jsonBody) {
     return { response: { statusCode: 400 } };
   }
   let heroUpdated = false;
-  const updatedHeros = heros.map(hero => {
+  const updatedHeroes = heroes.map(hero => {
     if (hero.id == id) {
       heroUpdated = true;
       return {
@@ -84,29 +84,29 @@ const UpdateHero = ({
     return hero;
   });
   return heroUpdated
-    ? { heros: updatedHeros, response: { statusCode: 204 } }
+    ? { heroes: updatedHeroes, response: { statusCode: 204 } }
     : { response: { statusCode: 404 } };
 };
 const RemoveHero = ({
   request: {
     params: { id }
   },
-  heros
+  heroes
 }) => {
-  const updatedHeros = heros.filter(hero => hero.id != id);
-  return updatedHeros.length !== heros.length
-    ? { heros: updatedHeros, response: { statusCode: 204 } }
+  const updatedHeroes = heroes.filter(hero => hero.id != id);
+  return updatedHeroes.length !== heroes.length
+    ? { heroes: updatedHeroes, response: { statusCode: 204 } }
     : { response: { statusCode: 404 } };
 };
 
-const ReadHerosEffect = [
+const ReadHeroesEffect = [
   ReadJsonFileEffect,
-  { path: HEROS_PATH, onSuccess: (_, heros) => ({ heros }) }
+  { path: HEROES_PATH, onSuccess: (_, heroes) => ({ heroes }) }
 ];
 
-const WriteHerosEffect = ({ heros }) => [
+const WriteHeroesEffect = ({ heroes }) => [
   WriteJsonFileEffect,
-  { path: HEROS_PATH, data: heros }
+  { path: HEROES_PATH, data: heroes }
 ];
 
 const routes = {
@@ -116,13 +116,13 @@ const routes = {
       text: "these aren't the droids you're looking for..."
     }
   }),
-  heros: {
-    GET: GetHeros,
-    POST: [AddHero, WriteHerosEffect],
+  heroes: {
+    GET: GetHeroes,
+    POST: [AddHero, WriteHeroesEffect],
     $id: {
       GET: GetHero,
-      PUT: [UpdateHero, WriteHerosEffect],
-      DELETE: [RemoveHero, WriteHerosEffect]
+      PUT: [UpdateHero, WriteHeroesEffect],
+      DELETE: [RemoveHero, WriteHeroesEffect]
     }
   },
   debug: json => ({
@@ -157,7 +157,7 @@ const LoggingFx = [
 ];
 
 app({
-  initFx: [initialState, ReadHerosEffect],
+  initFx: [initialState, ReadHeroesEffect],
   routes,
   requestFx: [
     ({ count }) => ({

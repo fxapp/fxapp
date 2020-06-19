@@ -4,4 +4,4 @@
 # Misc
 node_modules/
 coverage/
-example/heros.json
+example/heroes.json
